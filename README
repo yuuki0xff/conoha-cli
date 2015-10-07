@@ -1,0 +1,7 @@
+Conoha VPSのCLI
+===============
+
+INSTALL
+-------
+ln -s $PWD/src/conoha-cli.py ~/bin/conoha-cli
+
