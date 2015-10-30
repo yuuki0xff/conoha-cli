@@ -45,5 +45,5 @@ class VMList(API):
 		return res['server']['id']
 
 	def delete(self, vmid):
-		self._DELETE('servers/'+vmid)
+		self._DELETE('servers/'+vmid, isDeserialize=True)
 
