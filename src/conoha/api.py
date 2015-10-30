@@ -6,11 +6,14 @@ __ALL__ = 'API Tenant'.split()
 
 class API:
 	baseURI = 'https://identity.tyo1.conoha.io'
+	identity = None
 
 	def _getHeaders(self):
 		headers={
 				'Accept': 'application/json',
 				}
+		if self.identity:
+			headers['X-Auth-Token'] = self.identity.getAuthToken()
 		return headers
 
 	def _GET(self, path, baseURI=None):
