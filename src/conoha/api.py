@@ -8,29 +8,35 @@ class API:
 	baseURI = 'https://identity.tyo1.conoha.io'
 	identity = None
 
-	def _getHeaders(self):
+	def _getHeaders(self, h):
 		headers={
 				'Accept': 'application/json',
 				}
 		if self.identity:
 			headers['X-Auth-Token'] = self.identity.getAuthToken()
+		if h:
+			headers.update(h)
 		return headers
 
-	def _GET(self, path, baseURI=None):
+	def _GET(self, path, baseURI=None, headers=None, method='GET'):
 		req = Request(
 				url=(baseURI or self.baseURI)+path,
-				headers=self._getHeaders(),
+				headers=self._getHeaders(headers),
+				method=method,
 				)
 		with urlopen(req) as res:
 			return json.loads(str(res.read(), 'utf8'))
 
-	def _POST(self, path, data, baseURI=None):
+	def _DELETE(self, *args, **nargs):
+		return self._GET(*args, method='DELETE', **nargs)
+
+	def _POST(self, path, data, baseURI=None, headers=None):
 		data = bytes(json.dumps(data), 'utf8')
 		req = Request(
 				url=(baseURI or self.baseURI)+path,
 				data=data,
 				method='POST',
-				headers=self._getHeaders(),
+				headers=self._getHeaders(headers),
 				)
 		with urlopen(req) as res:
 			return json.loads(str(res.read(), 'utf8'))
