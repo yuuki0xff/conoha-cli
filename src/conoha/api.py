@@ -18,7 +18,7 @@ class API:
 			headers.update(h)
 		return headers
 
-	def _GET(self, path, data=None, baseURI=None, headers=None, method='GET'):
+	def _GET(self, path, data=None, isDeserialize=False, baseURI=None, headers=None, method='GET'):
 		if data:
 			data = bytes(json.dumps(data), 'utf8')
 		req = Request(
@@ -28,7 +28,11 @@ class API:
 				data=data,
 				)
 		with urlopen(req) as res:
-			return json.loads(str(res.read(), 'utf8'))
+			resBin = res.read()
+			if isDeserialize:
+				return resBin
+			else:
+				return json.loads(str(resBin, 'utf8'))
 
 	def _DELETE(self, *args, **nargs):
 		return self._GET(*args, method='DELETE', **nargs)
