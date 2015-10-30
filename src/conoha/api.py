@@ -18,11 +18,14 @@ class API:
 			headers.update(h)
 		return headers
 
-	def _GET(self, path, baseURI=None, headers=None, method='GET'):
+	def _GET(self, path, data=None, baseURI=None, headers=None, method='GET'):
+		if data:
+			data = bytes(json.dumps(data), 'utf8')
 		req = Request(
 				url=(baseURI or self.baseURI)+path,
 				headers=self._getHeaders(headers),
 				method=method,
+				data=data,
 				)
 		with urlopen(req) as res:
 			return json.loads(str(res.read(), 'utf8'))
@@ -30,16 +33,8 @@ class API:
 	def _DELETE(self, *args, **nargs):
 		return self._GET(*args, method='DELETE', **nargs)
 
-	def _POST(self, path, data, baseURI=None, headers=None):
-		data = bytes(json.dumps(data), 'utf8')
-		req = Request(
-				url=(baseURI or self.baseURI)+path,
-				data=data,
-				method='POST',
-				headers=self._getHeaders(headers),
-				)
-		with urlopen(req) as res:
-			return json.loads(str(res.read(), 'utf8'))
+	def _POST(self, path, data, *args, **nargs):
+		return self._GET(path, data, *args, method='POST', **nargs)
 
 class Identity(API):
 	baseURI = 'https://identity.tyo1.conoha.io'
