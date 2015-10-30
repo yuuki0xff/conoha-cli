@@ -15,11 +15,11 @@ class API:
 
 	def _GET(self, path, baseURI=None):
 		req = Request(
-				url=(baseURI or self.baseURI),
+				url=(baseURI or self.baseURI)+path,
 				headers=self._getHeaders(),
 				)
 		with urlopen(req) as res:
-			return json.loads(res.read())
+			return json.loads(str(res.read(), 'utf8'))
 
 	def _POST(self, path, data, baseURI=None):
 		data = bytes(json.dumps(data), 'utf8')
