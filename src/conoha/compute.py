@@ -47,3 +47,32 @@ class VMList(API):
 	def delete(self, vmid):
 		self._DELETE('servers/'+vmid, isDeserialize=False)
 
+class VM(API):
+	baseURI = 'https://compute.tyo1.conoha.io/v2/'
+	vmid = None
+	name = None
+
+	def __init__(self, identity, info):
+		self.baseURI += identity.getTenantId() + '/'
+		self.identity = identity
+		self.vmid = info['id']
+		self.name = info['name']
+		self.baseURI += 'servers/' + self.vmid + '/'
+
+	def _action(self, actionName, actionValue=None):
+		action = {actionName: actionValue}
+		self._POST('action', action, isDeserialize=False)
+	def run(self):
+		self._action('os-start')
+	def stop(self, force=False):
+		if force:
+			self._action('os-stop', {'force_shutdown': True})
+		else:
+			self._action('os-stop')
+	def restart(self):
+		self._action('reboot', {'type': 'SOFT'})
+	def resize(self, flavorId):
+		self._action('resize', {'flavorRef': flavorId})
+
+	def rebuild(self): pass
+
