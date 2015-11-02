@@ -76,3 +76,22 @@ class VM(API):
 
 	def rebuild(self): pass
 
+class KeyList(API):
+	baseURI = 'https://compute.tyo1.conoha.io/v2/'
+	keys = None
+
+	def __init__(self, identity):
+		self.baseURI += identity.getTenantId() + '/'
+		self.identity = identity
+
+	def getKeys(self):
+		res = self._GET('os-keypairs')
+		self.keys = (keypair['keypair'] for keypair in res['keypairs'])
+
+class Kye(API):
+	baseURI = 'https://compute.tyo1.conoha.io/v2/'
+
+	def __init__(self, identity, info):
+		self.baseURI += identity.getTenantId() + '/os-keypairs'
+		self.identity = identity
+
