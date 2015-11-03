@@ -77,6 +77,9 @@ class VM(API):
 		self._action('reboot', {'type': 'SOFT'})
 	def resize(self, flavorId):
 		self._action('resize', {'flavorRef': flavorId})
+	def getStatus(self):
+		res = self._GET('')
+		return res['server']['status']
 
 class KeyList(API):
 	baseURI = 'https://compute.tyo1.conoha.io/v2/'
