@@ -77,6 +77,10 @@ class VM(API):
 		self._action('reboot', {'type': 'SOFT'})
 	def resize(self, flavorId):
 		self._action('resize', {'flavorRef': flavorId})
+	def confirmResize(self):
+		self._action('confirmResize')
+	def revertResize(self):
+		self._action('revertResize')
 	def getStatus(self):
 		res = self._GET('')
 		return res['server']['status']
