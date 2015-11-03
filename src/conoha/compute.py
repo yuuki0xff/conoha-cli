@@ -35,6 +35,10 @@ class VMList(API):
 		self.servers = res['servers']
 		return self.servers
 
+	def getServer(self, vmid):
+		res = self._GET('servers/'+vmid)
+		return VM(self.identity, res['server'])
+
 	def add(self, image, flavor):
 		data = {'server' : {
 				'imageRef' : image,
