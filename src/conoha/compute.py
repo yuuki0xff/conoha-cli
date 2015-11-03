@@ -74,8 +74,6 @@ class VM(API):
 	def resize(self, flavorId):
 		self._action('resize', {'flavorRef': flavorId})
 
-	def rebuild(self): pass
-
 class KeyList(API):
 	baseURI = 'https://compute.tyo1.conoha.io/v2/'
 	keys = None
