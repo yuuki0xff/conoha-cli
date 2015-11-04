@@ -5,3 +5,15 @@ INSTALL
 -------
 ln -s $PWD/src/conoha-cli.py ~/bin/conoha-cli
 
+USE
+---
+conoha-cli compute plans  \[--ram SIZE\] \[--cpu COUNT\] \[--storage SIZE\] \[--storage-type "SSD"|"HDD"\]
+conoha-cli compute list   \[--name NAME\] \[--region REGION\] \[--status STATUS\] \[--plan PLAN\]
+conoha-cli compute add    \[--name NAME\] \[--id ID\]
+conoha-cli compute status \[--name NAME\] \[--id ID\]
+conoha-cli compute start  \[--name NAME\] \[--id ID\]
+conoha-cli compute stop   \[--name NAME\] \[--id ID\] \[--force\]
+conoha-cli compute reboot \[--name NAME\] \[--id ID\] \[--force\]
+conoha-cli compute delete \[--name NAME\] \[--id ID\] \[--force\]
+conoha-cli compute resize \[--name NAME\] \[--id ID\] \[--plan PLAN\]
+
