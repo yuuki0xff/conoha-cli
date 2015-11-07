@@ -35,6 +35,10 @@ class VMList(API):
 		self.servers = res['servers']
 		return self.servers
 
+	def getServer(self, vmid):
+		res = self._GET('servers/'+vmid)
+		return VM(self.identity, res['server'])
+
 	def add(self, image, flavor):
 		data = {'server' : {
 				'imageRef' : image,
@@ -73,8 +77,13 @@ class VM(API):
 		self._action('reboot', {'type': 'SOFT'})
 	def resize(self, flavorId):
 		self._action('resize', {'flavorRef': flavorId})
-
-	def rebuild(self): pass
+	def confirmResize(self):
+		self._action('confirmResize')
+	def revertResize(self):
+		self._action('revertResize')
+	def getStatus(self):
+		res = self._GET('')
+		return res['server']['status']
 
 class KeyList(API):
 	baseURI = 'https://compute.tyo1.conoha.io/v2/'
