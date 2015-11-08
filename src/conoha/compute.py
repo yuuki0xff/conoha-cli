@@ -65,16 +65,17 @@ class VMImageList(ComputeAPI):
 			yield VMImage(i)
 
 class VMList(ComputeAPI):
-	servers = None
+	_servers = None
 
 	def __init__(self, identity):
 		self.baseURI += identity.getTenantId() + '/'
 		self.identity = identity
+		res = self._GET('servers/detail')
+		self._servers = res['servers']
 
-	def getServers(self):
-		res = self._GET('servers')
-		self.servers = res['servers']
-		return self.servers
+	def __iter__(self):
+		for v in self._servers:
+			yield VM(self.identity, v)
 
 	def getServer(self, vmid):
 		res = self._GET('servers/'+vmid)
