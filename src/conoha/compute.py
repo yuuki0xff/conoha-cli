@@ -153,13 +153,50 @@ class KeyList(ComputeAPI):
 	def __init__(self, identity):
 		self.baseURI += identity.getTenantId() + '/'
 		self.identity = identity
-
-	def getKeys(self):
 		res = self._GET('os-keypairs')
 		self.keys = (keypair['keypair'] for keypair in res['keypairs'])
 
+	def __iter__(self):
+		for key in self.keys:
+			yield Key(key)
+
+	def add(self, name, publicKey=None, publicKeyFile=None):
+		"""
+		publicKey が文字列なら、そのキーを使用
+		publicKeyFile が文字列なら、そのキーを使用
+		publicKey or publicKeyFile がfile likeオブジェクトなら、そのキーを使用
+		publicKey is None ならば、新しいキーを作成。必ず返されるKey objectからprivateKeyを取得し、保存すること
+		"""
+		data = {'keypair':{'name': name}}
+		keyString = None
+
+		if type(publicKey) is str:
+			keyString = publicKey
+		elif type(publicKeyFile) is str:
+			with open(publicKeyFile) as f:
+				keyString = f.read()
+		elif (publicKey or publicKeyFile) is not None:
+			keyString = (publicKey or publicKeyFile).read()
+		else:
+			res = self._POST('os-keypairs', data=data)
+			return Key(res['keypair'])
+
+		data['keypair']['public_key'] = keyString
+		res = self._POST('os-keypairs', data=data)
+		return Key(res['keypair'])
+
+	def delete(self, keyName):
+		self._DELETE('os-keypairs/'+keyName, isDeserialize=False)
+
 class Key(ComputeAPI):
-	def __init__(self, identity, info):
-		self.baseURI += identity.getTenantId() + '/os-keypairs'
-		self.identity = identity
+	name = None
+	fingerprint = None
+	publicKey = None
+	privateKey = None
+
+	def __init__(self, info):
+		self.name = info['name']
+		self.fingerprint = info['fingerprint']
+		self.publicKey = info['public_key']
+		self.privateKey = info.get('private_key')
 
