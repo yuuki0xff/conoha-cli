@@ -4,14 +4,30 @@ from .api import API, Identity
 class ComputeAPI(API):
 	baseURI = 'https://compute.tyo1.conoha.io/v2/'
 
-class VMPlans(ComputeAPI):
-	flavors = None
+class VMPlan(ComputeAPI):
+	name = None
+	disk = None
+	ram = None
+	vcpus = None
+
+	def __init__(self, data):
+		self.name = data['name']
+		self.disk = data['disk']
+		self.ram = data['ram']
+		self.vcpus = data['vcpus']
+
+class VMPlanList(ComputeAPI):
+	_flavors = None
 
 	def __init__(self, identity):
-		path = identity.getTenantId() + '/flavors'
+		path = identity.getTenantId() + '/flavors/detail'
 		self.identity = identity
 		res = self._GET(path)
-		self.flavors = res['flavors']
+		self._flavors = res['flavors']
+
+	def __iter__(self):
+		for f in self._flavors:
+			yield VMPlan(f)
 
 class VMImages(ComputeAPI):
 	images = None
