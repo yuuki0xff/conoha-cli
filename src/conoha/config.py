@@ -10,7 +10,7 @@ class Config(SafeConfigParser):
 		super().__init__()
 		os.environ.setdefault('XDG_CONFIG_HOME', '~/.config')
 		self.read(self._pathExpand_([
-			'~/$XDG_CONFIG_HOME/conoha/config'
+			'$XDG_CONFIG_HOME/conoha/config'
 			'~/.conoha/conifg',
 			]))
 
