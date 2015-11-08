@@ -5,12 +5,14 @@ class ComputeAPI(API):
 	baseURI = 'https://compute.tyo1.conoha.io/v2/'
 
 class VMPlan(ComputeAPI):
+	planId = None
 	name = None
 	disk = None
 	ram = None
 	vcpus = None
 
 	def __init__(self, data):
+		self.planId = data['id']
 		self.name = data['name']
 		self.disk = data['disk']
 		self.ram = data['ram']
