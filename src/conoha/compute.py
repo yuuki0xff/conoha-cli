@@ -1,10 +1,11 @@
 
 from .api import API, Identity
 
-class VMPlans(API):
+class ComputeAPI(API):
 	baseURI = 'https://compute.tyo1.conoha.io/v2/'
+
+class VMPlans(ComputeAPI):
 	flavors = None
-	identity = None
 
 	def __init__(self, identity):
 		path = identity.getTenantId() + '/flavors'
@@ -12,8 +13,7 @@ class VMPlans(API):
 		res = self._GET(path)
 		self.flavors = res['flavors']
 
-class VMImages(API):
-	baseURI = 'https://compute.tyo1.conoha.io/v2/'
+class VMImages(ComputeAPI):
 	images = None
 
 	def __init__(self, identity):
@@ -22,8 +22,7 @@ class VMImages(API):
 		res = self._GET(path)
 		self.images = res['images']
 
-class VMList(API):
-	baseURI = 'https://compute.tyo1.conoha.io/v2/'
+class VMList(ComputeAPI):
 	servers = None
 
 	def __init__(self, identity):
@@ -51,8 +50,7 @@ class VMList(API):
 	def delete(self, vmid):
 		self._DELETE('servers/'+vmid, isDeserialize=False)
 
-class VM(API):
-	baseURI = 'https://compute.tyo1.conoha.io/v2/'
+class VM(ComputeAPI):
 	vmid = None
 	name = None
 
@@ -85,8 +83,7 @@ class VM(API):
 		res = self._GET('')
 		return res['server']['status']
 
-class KeyList(API):
-	baseURI = 'https://compute.tyo1.conoha.io/v2/'
+class KeyList(ComputeAPI):
 	keys = None
 
 	def __init__(self, identity):
@@ -97,9 +94,7 @@ class KeyList(API):
 		res = self._GET('os-keypairs')
 		self.keys = (keypair['keypair'] for keypair in res['keypairs'])
 
-class Kye(API):
-	baseURI = 'https://compute.tyo1.conoha.io/v2/'
-
+class Kye(ComputeAPI):
 	def __init__(self, identity, info):
 		self.baseURI += identity.getTenantId() + '/os-keypairs'
 		self.identity = identity
