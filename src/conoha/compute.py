@@ -95,14 +95,35 @@ class VMList(ComputeAPI):
 
 class VM(ComputeAPI):
 	vmid = None
+	flavorId = None
+	hostId = None
+	imageId = None
+	tenantId = None
 	name = None
+	status = None
+	created = None
+	updated = None
+	addressList = None
+	securityGroupList = None
 
 	def __init__(self, identity, info):
-		self.baseURI += identity.getTenantId() + '/'
-		self.identity = identity
 		self.vmid = info['id']
+		self.flavorId = info['flavor']['id']
+		self.hostId = info['hostId']
+		self.imageId = info['image']['id']
+		self.tenantId = info['tenant_id']
 		self.name = info['name']
-		self.baseURI += 'servers/' + self.vmid + '/'
+		self.status = info['status']
+		self.created = info['created']
+		self.updated = info['updated']
+		self.status = info['status']
+		self.created = info['created']
+		self.updated = info['updated']
+		self.addressList = info['addresses']
+		self.securityGroupList = info['security_groups']
+
+		self.identity = identity
+		self.baseURI += self.tenantId + '/servers/' + self.vmid + '/'
 
 	def _action(self, actionName, actionValue=None):
 		action = {actionName: actionValue}
