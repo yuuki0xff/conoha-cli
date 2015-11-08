@@ -31,14 +31,38 @@ class VMPlanList(ComputeAPI):
 		for f in self._flavors:
 			yield VMPlan(f)
 
-class VMImages(ComputeAPI):
-	images = None
+class VMImage(ComputeAPI):
+	imageId = None
+	name = None
+	minDisk = None
+	minRam = None
+	progress = None
+	status = None
+	created = None
+	updated = None
+
+	def __init__(self, data):
+		self.imageId = data['id']
+		self.name = data['name']
+		self.minDisk = data['minDisk']
+		self.minRam = data['minRam']
+		self.progress = data['progress']
+		self.status = data['status']
+		self.created = data['created']
+		self.updated = data['updated']
+
+class VMImageList(ComputeAPI):
+	_images = None
 
 	def __init__(self, identity):
-		path = identity.getTenantId() + '/images'
+		path = identity.getTenantId() + '/images/detail'
 		self.identity = identity
 		res = self._GET(path)
-		self.images = res['images']
+		self._images = res['images']
+
+	def __iter__(self):
+		for i in self._images:
+			yield VMImage(i)
 
 class VMList(ComputeAPI):
 	servers = None
