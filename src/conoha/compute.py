@@ -158,7 +158,7 @@ class KeyList(ComputeAPI):
 		res = self._GET('os-keypairs')
 		self.keys = (keypair['keypair'] for keypair in res['keypairs'])
 
-class Kye(ComputeAPI):
+class Key(ComputeAPI):
 	def __init__(self, identity, info):
 		self.baseURI += identity.getTenantId() + '/os-keypairs'
 		self.identity = identity
