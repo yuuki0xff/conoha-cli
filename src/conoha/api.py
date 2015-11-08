@@ -5,7 +5,7 @@ import json
 __ALL__ = 'API Tenant'.split()
 
 class API:
-	baseURI = 'https://identity.tyo1.conoha.io'
+	baseURI = None
 	identity = None
 
 	def _getHeaders(self, h):
