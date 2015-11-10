@@ -148,16 +148,16 @@ class VM(ComputeAPI):
 		return res['server']['status']
 
 class KeyList(ComputeAPI):
-	keys = None
+	_keys = None
 
 	def __init__(self, identity):
 		self.baseURI += identity.getTenantId() + '/'
 		self.identity = identity
 		res = self._GET('os-keypairs')
-		self.keys = (keypair['keypair'] for keypair in res['keypairs'])
+		self._keys = (keypair['keypair'] for keypair in res['keypairs'])
 
 	def __iter__(self):
-		for key in self.keys:
+		for key in self._keys:
 			yield Key(key)
 
 	def add(self, name, publicKey=None, publicKeyFile=None):
