@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 from conoha.config import Config
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 import sys
 
 def main():
