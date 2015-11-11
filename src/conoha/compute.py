@@ -1,5 +1,5 @@
 
-from .api import API, Identity
+from .api import API, Token
 
 class ComputeAPI(API):
 	baseURI = 'https://compute.tyo1.conoha.io/v2/'
@@ -21,9 +21,9 @@ class VMPlan(ComputeAPI):
 class VMPlanList(ComputeAPI):
 	_flavors = None
 
-	def __init__(self, identity):
-		path = identity.getTenantId() + '/flavors/detail'
-		self.identity = identity
+	def __init__(self, token):
+		path = token.getTenantId() + '/flavors/detail'
+		self.token = token
 		res = self._GET(path)
 		self._flavors = res['flavors']
 
@@ -54,9 +54,9 @@ class VMImage(ComputeAPI):
 class VMImageList(ComputeAPI):
 	_images = None
 
-	def __init__(self, identity):
-		path = identity.getTenantId() + '/images/detail'
-		self.identity = identity
+	def __init__(self, token):
+		path = token.getTenantId() + '/images/detail'
+		self.token = token
 		res = self._GET(path)
 		self._images = res['images']
 
@@ -67,19 +67,19 @@ class VMImageList(ComputeAPI):
 class VMList(ComputeAPI):
 	_servers = None
 
-	def __init__(self, identity):
-		self.baseURI += identity.getTenantId() + '/'
-		self.identity = identity
+	def __init__(self, token):
+		self.baseURI += token.getTenantId() + '/'
+		self.token = token
 		res = self._GET('servers/detail')
 		self._servers = res['servers']
 
 	def __iter__(self):
 		for v in self._servers:
-			yield VM(self.identity, v)
+			yield VM(self.token, v)
 
 	def getServer(self, vmid):
 		res = self._GET('servers/'+vmid)
-		return VM(self.identity, res['server'])
+		return VM(self.token, res['server'])
 
 	def add(self, image, flavor):
 		data = {'server' : {
@@ -106,7 +106,7 @@ class VM(ComputeAPI):
 	addressList = None
 	securityGroupList = None
 
-	def __init__(self, identity, info):
+	def __init__(self, token, info):
 		self.vmid = info['id']
 		self.flavorId = info['flavor']['id']
 		self.hostId = info['hostId']
@@ -122,7 +122,7 @@ class VM(ComputeAPI):
 		self.addressList = info['addresses']
 		self.securityGroupList = info['security_groups']
 
-		self.identity = identity
+		self.token = token
 		self.baseURI += self.tenantId + '/servers/' + self.vmid + '/'
 
 	def _action(self, actionName, actionValue=None):
@@ -150,9 +150,9 @@ class VM(ComputeAPI):
 class KeyList(ComputeAPI):
 	_keys = None
 
-	def __init__(self, identity):
-		self.baseURI += identity.getTenantId() + '/'
-		self.identity = identity
+	def __init__(self, token):
+		self.baseURI += token.getTenantId() + '/'
+		self.token = token
 		res = self._GET('os-keypairs')
 		self._keys = (keypair['keypair'] for keypair in res['keypairs'])
 
