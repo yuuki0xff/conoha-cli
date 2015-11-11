@@ -1,20 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 from conoha.config import Config
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
+import sys
 
 def main():
 	parser = getArgumentParser()
-	parser.parse_args()
+	try:
+		parsed_args = parser.parse_args()
+		# サブコマンドだけを指定した場合は失敗
+		assert('func' in parsed_args)
+		print(parsed_args)
+	except AssertionError:
+		# 失敗した場合は、そのサブコマンドに対応するhelpを表示
+		parser.parse_args(sys.argv[1:]+['-h'])
 
 def getArgumentParser():
 	parser = ArgumentParser()
 	subparser = parser.add_subparsers()
-	subparser.required = True
 
 	parser_compute = subparser.add_parser('compute')
 	subparser_compute = parser_compute.add_subparsers()
-	subparser_compute.required = True
 
 	parser_compute_plans = subparser_compute.add_parser('plans')
 	parser_compute_plans.add_argument('--ram', type=str)
