@@ -70,12 +70,18 @@ class VMList(ComputeAPI):
 	def __init__(self, token):
 		self.baseURI += token.getTenantId() + '/'
 		self.token = token
-		res = self._GET('servers/detail')
-		self._servers = res['servers']
+		self.update()
 
 	def __iter__(self):
+		if self._servers is None:
+			self.update()
+
 		for v in self._servers:
 			yield VM(self.token, v)
+
+	def update(self):
+		res = self._GET('servers/detail')
+		self._servers = res['servers']
 
 	def getServer(self, vmid):
 		res = self._GET('servers/'+vmid)
@@ -88,10 +94,12 @@ class VMList(ComputeAPI):
 				'adminPass' : '(Rasdfjklweiojfdsakl'
 				}}
 		res = self._POST('servers', data)
+		self._servers = None
 		return res['server']['id']
 
 	def delete(self, vmid):
 		self._DELETE('servers/'+vmid, isDeserialize=False)
+		self._servers = None
 
 class VM(ComputeAPI):
 	vmid = None
@@ -153,12 +161,18 @@ class KeyList(ComputeAPI):
 	def __init__(self, token):
 		self.baseURI += token.getTenantId() + '/'
 		self.token = token
-		res = self._GET('os-keypairs')
-		self._keys = (keypair['keypair'] for keypair in res['keypairs'])
+		self.update()
 
 	def __iter__(self):
+		if self._keys is None:
+			self.update()
+
 		for key in self._keys:
 			yield Key(key)
+
+	def update(self):
+		res = self._GET('os-keypairs')
+		self._keys = (keypair['keypair'] for keypair in res['keypairs'])
 
 	def add(self, name, publicKey=None, publicKeyFile=None):
 		"""
@@ -183,10 +197,12 @@ class KeyList(ComputeAPI):
 
 		data['keypair']['public_key'] = keyString
 		res = self._POST('os-keypairs', data=data)
+		self._keys = None
 		return Key(res['keypair'])
 
 	def delete(self, keyName):
 		self._DELETE('os-keypairs/'+keyName, isDeserialize=False)
+		self._keys = None
 
 class Key(ComputeAPI):
 	name = None
