@@ -1,5 +1,5 @@
 
-from .api import API, Token
+from .api import API
 
 class ComputeAPI(API):
 	baseURI = 'https://compute.tyo1.conoha.io/v2/'
