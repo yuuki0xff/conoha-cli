@@ -136,7 +136,7 @@ class VM(ComputeAPI):
 	def _action(self, actionName, actionValue=None):
 		action = {actionName: actionValue}
 		self._POST('action', action, isDeserialize=False)
-	def run(self):
+	def start(self):
 		self._action('os-start')
 	def stop(self, force=False):
 		if force:
