@@ -83,16 +83,20 @@ class VMList(ComputeAPI):
 		res = self._GET('servers/detail')
 		self._servers = res['servers']
 
-	def getServer(self, vmid):
-		res = self._GET('servers/'+vmid)
-		return VM(self.token, res['server'])
+	def getServer(self, vmid=None, name=None):
+		for vm in self:
+			if (vmid and vm.vmid == vmid) or (name and vm.name == name):
+				return vm
 
-	def add(self, image, flavor):
+	def add(self, image, flavor, adminPass=None, keyName=None, name=None):
 		data = {'server' : {
 				'imageRef' : image,
 				'flavorRef' : flavor,
-				'adminPass' : '(Rasdfjklweiojfdsakl'
 				}}
+		if adminPass: data['adminPass'] = adminPass
+		if keyName: data['key_name'] = keyName
+		if name: data['instance_name_tag'] = name
+
 		res = self._POST('servers', data)
 		self._servers = None
 		return res['server']['id']
