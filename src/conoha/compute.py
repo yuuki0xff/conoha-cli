@@ -92,10 +92,12 @@ class VMList(ComputeAPI):
 		data = {'server' : {
 				'imageRef' : image,
 				'flavorRef' : flavor,
+				'metadata': {},
 				}}
-		if adminPass: data['adminPass'] = adminPass
-		if keyName: data['key_name'] = keyName
-		if name: data['instance_name_tag'] = name
+		if adminPass: data['server']['adminPass'] = adminPass
+		if keyName: data['server']['key_name'] = keyName
+		if name:
+			data['server']['metadata']['instance_name_tag'] = name
 
 		res = self._POST('servers', data)
 		self._servers = None
