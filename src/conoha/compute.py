@@ -126,7 +126,10 @@ class VM(ComputeAPI):
 		self.hostId = info['hostId']
 		self.imageId = info['image']['id']
 		self.tenantId = info['tenant_id']
-		self.name = info['name']
+		try:
+			self.name = info['metadata']['instance_name_tag']
+		except KeyError:
+			self.name = info['name']
 		self.status = info['status']
 		self.created = info['created']
 		self.updated = info['updated']
