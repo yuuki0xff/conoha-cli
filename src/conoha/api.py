@@ -40,6 +40,9 @@ class API:
 	def _POST(self, path, data, *args, **nargs):
 		return self._GET(path, data, *args, method='POST', **nargs)
 
+	def _PUT(self, path, data, *args, **nargs):
+		return self._GET(path, data, *args, method='PUT', **nargs)
+
 class Token(API):
 	baseURI = 'https://identity.tyo1.conoha.io'
 	token = None
