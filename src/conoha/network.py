@@ -23,6 +23,11 @@ class SecurityGroupList(NetworkAPI):
 		res = self._GET('security-groups')
 		self._groups = res['security_groups']
 
+	def getSecurityGroup(self, sgid=None, name=None):
+		for sg in self:
+			if (sg.id_ == sgid) or (sg.name == name):
+				return sg
+
 	def add(self, name, description=None):
 		data = {'security_group': {
 			'name': name,
