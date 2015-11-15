@@ -5,6 +5,7 @@ from conoha.config import Config
 from argparse import ArgumentParser, FileType
 import sys
 from conoha.compute import VMPlanList, VMImageList, VMList, KeyList
+from conoha.network import SecurityGroupList
 
 def main():
 	parser = getArgumentParser()
@@ -32,6 +33,10 @@ def getArgumentParser():
 	parser_compute = subparser.add_parser('compute')
 	subparser_compute = parser_compute.add_subparsers()
 	ComputeCommand.configureParser(subparser_compute)
+
+	parser_network = subparser.add_parser('network')
+	subparser_network = parser_network.add_subparsers()
+	NetworkCommand.configureParser(subparser_network)
 
 	return parser
 
@@ -175,6 +180,95 @@ class ComputeCommand():
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
 		if vm:
 			vm.resize(args.planid)
+
+class NetworkCommand():
+	@classmethod
+	def configureParser(cls, subparser):
+		listSG = subparser.add_parser('list-security-groups')
+		listSG.add_argument('--verbose', action='store_true')
+		listSG.set_defaults(func=cls.listSecurityGroups)
+
+		addSG = subparser.add_parser('add-security-group')
+		addSG.add_argument('--name', type=str)
+		addSG.add_argument('--description', type=str)
+		addSG.set_defaults(func=cls.addSecurityGroup)
+
+		delSG = subparser.add_parser('delete-security-group')
+		delSG.add_argument('--name', type=str)
+		delSG.add_argument('--id', type=str)
+		delSG.set_defaults(func=cls.deleteSecurityGroup)
+
+		listRules = subparser.add_parser('list-rules')
+		listRules.add_argument('--verbose', action='store_true')
+		listRules.add_argument('--id', type=str)
+		listRules.add_argument('--name', type=str)
+		listRules.set_defaults(func=cls.listRules)
+
+		addRule = subparser.add_parser('add-rule')
+		addRule.add_argument('--id', type=str)
+		addRule.add_argument('--direction', type=str)
+		addRule.add_argument('--ethertype', type=str)
+		addRule.add_argument('--port', type=str)
+		addRule.add_argument('--protocol', type=str)
+		addRule.add_argument('--remoteIPPrefix', type=str)
+		addRule.set_defaults(func=cls.addRule)
+
+		delRule = subparser.add_parser('delete-rule')
+		delRule.add_argument('--group-id', type=str)
+		delRule.add_argument('--rule-id', type=str)
+		delRule.set_defaults(func=cls.deleteRule)
+
+	@classmethod
+	def listSecurityGroups(cls, token, args):
+		sglist = SecurityGroupList(token)
+		for sg in sglist:
+			a = [sg.id_, sg.name, sg.description]
+			print(a)
+
+	@classmethod
+	def addSecurityGroup(cls, token, args):
+		sglist = SecurityGroupList(token)
+		id_ = sglist.add(args.name, args.description)
+		print(id_)
+
+	@classmethod
+	def deleteSecurityGroup(cls, token, args):
+		sglist = SecurityGroupList(token)
+		sg = sglist.getSecurityGroup(sgid=args.id, name=args.name)
+		sglist.delete(sg.id_)
+
+	@classmethod
+	def listRules(cls, token, args):
+		sglist = SecurityGroupList(token)
+		sg = sglist.getSecurityGroup(sgid=args.id, name=args.name)
+
+		for rule in sg.rules:
+			if args.verbose:
+				a = [rule.id_, rule.direction, rule.ethertype, rule.rangeMin, rule.rangeMax, rule.protocol, rule.remoteIPPrefix]
+			else:
+				a = [rule.direction, rule.ethertype, rule.rangeMin, rule.rangeMax, rule.protocol, rule.remoteIPPrefix]
+			print(a)
+
+	@classmethod
+	def addRule(cls, token, args):
+		sglist = SecurityGroupList(token)
+		sg = sglist.getSecurityGroup(sgid=args.id)
+
+		portMin = None
+		portMax = None
+		if args.port:
+			if ',' in args.port:
+				portMin, portMax = args.port.split(',')
+			else:
+				portMin = portMax = args.port
+
+		sg.rules.add(args.direction, args.ethertype, portMin, portMax, args.protocol, args.remoteIPPrefix)
+
+	@classmethod
+	def deleteRule(cls, token, args):
+		sglist = SecurityGroupList(token)
+		sg = sglist.getSecurityGroup(sgid=args.group_id)
+		sg.rules.delete(args.rule_id)
 
 if __name__ == '__main__':
 	exit(main())
