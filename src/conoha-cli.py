@@ -72,6 +72,7 @@ class ComputeCommand():
 		addVmParser.add_argument('--planid', type=str)
 		addVmParser.add_argument('--passwd', type=str)
 		addVmParser.add_argument('--key', type=str)
+		addVmParser.add_argument('--group-names', type=str)
 		addVmParser.set_defaults(func=cls.add_vm)
 
 		vmCommands = {
@@ -141,8 +142,10 @@ class ComputeCommand():
 
 	@classmethod
 	def add_vm(cls, token, args):
+		groupNames = args.group_names and args.group_names.split(',')
+
 		vmlist = VMList(token)
-		vmid = vmlist.add(args.imageid, args.planid, adminPass=args.passwd, keyName=args.key, name=args.name)
+		vmid = vmlist.add(args.imageid, args.planid, adminPass=args.passwd, keyName=args.key, name=args.name, securityGroupNames=groupNames)
 		if not args.quiet:
 			print(vmid)
 

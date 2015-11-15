@@ -17,7 +17,7 @@ conoha-cli compute list-vms \[--verbose\]
 conoha-cli compute add-key \[--quiest\] --name NAME \[--file FILE | --key KEY\]  
 conoha-cli compute delete-key --name NAME  
 
-conoha-cli compute add-vm \[--quiest\] \[--name NAME\] \[--imageid IMAGE\_ID\] \[--planid PLAN\_ID\] \[--passwd PASSWD\] \[--key KEY\_NAME\]  
+conoha-cli compute add-vm \[--quiest\] \[--name NAME\] \[--imageid IMAGE\_ID\] \[--planid PLAN\_ID\] \[--passwd PASSWD\] \[--key KEY\_NAME\] \[--group-names SECURITY\_GROUP\_NAME,SECURITY\_GROUP\_NAME,...\]  
 conoha-cli compute start-vm  \[--name NAME | --id VM\_ID\]  
 conoha-cli compute stop-vm   \[--name NAME | --id VM\_ID\] \[--force\]  
 conoha-cli compute reboot-vm \[--name NAME | --id VM\_ID\]  

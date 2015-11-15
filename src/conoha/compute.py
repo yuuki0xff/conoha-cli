@@ -88,7 +88,7 @@ class VMList(ComputeAPI):
 			if (vmid and vm.vmid == vmid) or (name and vm.name == name):
 				return vm
 
-	def add(self, image, flavor, adminPass=None, keyName=None, name=None):
+	def add(self, image, flavor, adminPass=None, keyName=None, name=None, securityGroupNames=None):
 		data = {'server' : {
 				'imageRef' : image,
 				'flavorRef' : flavor,
@@ -98,6 +98,12 @@ class VMList(ComputeAPI):
 		if keyName: data['server']['key_name'] = keyName
 		if name:
 			data['server']['metadata']['instance_name_tag'] = name
+		if securityGroupNames:
+			data['server']['security_groups'] = []
+			for name in securityGroupNames:
+				data['server']['security_groups'].append({
+					'name': name,
+					})
 
 		res = self._POST('servers', data)
 		self._servers = None
