@@ -2,7 +2,7 @@
 from .api import API
 
 class NetworkAPI(API):
-	baseURI = 'https://networking.tyo1.conoha.io/v2.0/'
+	_serviceType = 'network'
 
 
 class SecurityGroupList(NetworkAPI):
