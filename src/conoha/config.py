@@ -35,15 +35,22 @@ class Config(SafeConfigParser):
 				},
 			}
 
-	def __init__(self):
+	def __init__(self, fromFile=None, fromDict=None):
 		super().__init__()
+		assert(not(fromFile and fromDict))
+
 		self._setDefaultValue()
 		self._readEnv()
-		os.environ.setdefault('XDG_CONFIG_HOME', '~/.config')
-		self.read(self._pathExpand_([
-			'$XDG_CONFIG_HOME/conoha/config',
-			'~/.conoha/conifg',
-			]))
+		if fromFile:
+			self.read_file(open(fromFile))
+		elif fromDict:
+			self.read_dict(fromDict)
+		else:
+			os.environ.setdefault('XDG_CONFIG_HOME', '~/.config')
+			self.read(self._pathExpand_([
+				'$XDG_CONFIG_HOME/conoha/config',
+				'~/.conoha/conifg',
+				]))
 
 	def _pathExpand_(self, pathList):
 		for i, item in enumerate(pathList):
