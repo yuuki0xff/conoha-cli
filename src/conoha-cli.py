@@ -19,11 +19,7 @@ def main():
 		return
 
 	conf = Config()
-	token = Token(
-			userName=conf['api']['user'],
-			password=conf['api']['passwd'],
-			tenantId=conf['api']['tenantId']
-			)
+	token = Token(conf)
 	parsed_args.func(token, parsed_args)
 
 def getArgumentParser():

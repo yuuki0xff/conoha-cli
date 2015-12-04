@@ -45,19 +45,21 @@ class API:
 
 class Token(API):
 	baseURI = 'https://identity.tyo1.conoha.io'
+	conf = None
 	token = None
 	tenantId = None
 
-	def __init__(self, userName, password, tenantId=None):
+	def __init__(self, conf):
+		self.conf = conf
 		path = '/v2.0/tokens'
 		data = { 'auth':{
 			'passwordCredentials':{
-				'username': userName,
-				'password': password,
+				'username': conf.get('api', 'user'),
+				'password': conf.get('api', 'passwd'),
 				},
 			}}
-		self.tenantId = tenantId
-		if tenantId:
+		self.tenantId = conf.get('api', 'tenant')
+		if self.tenantId:
 			data['auth']['passwordCredentials']['tenantId'] = tenantId
 		res = self._POST(path, data)
 		self.token = res['access']['token']
