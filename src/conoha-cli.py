@@ -53,7 +53,7 @@ class ComputeCommand():
 		addKeyParser = subparser.add_parser('add-key')
 		addKeyParser.add_argument('--quiet', action='store_true')
 		addKeyParser.add_argument('--name', type=str)
-		addKeyParser.add_argument('--file', type=FileType)
+		addKeyParser.add_argument('--file', type=FileType('r'))
 		addKeyParser.add_argument('--key', type=str)
 		addKeyParser.set_defaults(func=cls.add_key)
 
