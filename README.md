@@ -4,7 +4,8 @@ conoha-cli is a command and Python3 library for [ConoHa](https://www.conoha.jp/)
 
 Installation
 ------------
-ln -s $PWD/src/conoha-cli.py ~/bin/conoha-cli
+from PIP : ``` pip install conoha-cli ```  
+from Source : ``` ./setup.py install ```  
 
 Command Usage
 -------------
