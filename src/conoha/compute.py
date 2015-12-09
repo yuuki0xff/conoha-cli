@@ -2,7 +2,10 @@
 from .api import API
 
 class ComputeAPI(API):
-	baseURI = 'https://compute.tyo1.conoha.io/v2/'
+	_serviceType = 'compute'
+
+	def __init__(self, token, baseURIPrefix=None):
+		super().__init__(token, baseURIPrefix)
 
 class VMPlan(ComputeAPI):
 	planId = None
@@ -22,8 +25,8 @@ class VMPlanList(ComputeAPI):
 	_flavors = None
 
 	def __init__(self, token):
-		path = token.getTenantId() + '/flavors/detail'
-		self.token = token
+		super().__init__(token)
+		path = 'flavors/detail'
 		res = self._GET(path)
 		self._flavors = res['flavors']
 
@@ -55,8 +58,8 @@ class VMImageList(ComputeAPI):
 	_images = None
 
 	def __init__(self, token):
-		path = token.getTenantId() + '/images/detail'
-		self.token = token
+		super().__init__(token)
+		path = 'images/detail'
 		res = self._GET(path)
 		self._images = res['images']
 
@@ -68,8 +71,7 @@ class VMList(ComputeAPI):
 	_servers = None
 
 	def __init__(self, token):
-		self.baseURI += token.getTenantId() + '/'
-		self.token = token
+		super().__init__(token)
 		self.update()
 
 	def __iter__(self):
@@ -127,6 +129,7 @@ class VM(ComputeAPI):
 	securityGroupList = None
 
 	def __init__(self, token, info):
+		super().__init__(token, baseURIPrefix='servers/' + self.vmid)
 		self.vmid = info['id']
 		self.flavorId = info['flavor']['id']
 		self.hostId = info['hostId']
@@ -144,9 +147,6 @@ class VM(ComputeAPI):
 		self.updated = info['updated']
 		self.addressList = info['addresses']
 		self.securityGroupList = info['security_groups']
-
-		self.token = token
-		self.baseURI += self.tenantId + '/servers/' + self.vmid + '/'
 
 	def _action(self, actionName, actionValue=None):
 		action = {actionName: actionValue}
@@ -174,8 +174,7 @@ class KeyList(ComputeAPI):
 	_keys = None
 
 	def __init__(self, token):
-		self.baseURI += token.getTenantId() + '/'
-		self.token = token
+		super().__init__(token)
 		self.update()
 
 	def __iter__(self):

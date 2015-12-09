@@ -5,8 +5,13 @@ import json
 __ALL__ = 'API Tenant'.split()
 
 class API:
-	baseURI = None
+	__baseURI = None
 	token = None
+	_serviceType = None
+
+	def __init__(self, token=None, baseURIPrefix=None):
+		self.token = token
+		self.baseURIPrefix = baseURIPrefix
 
 	def _getHeaders(self, h):
 		headers={
@@ -18,11 +23,21 @@ class API:
 			headers.update(h)
 		return headers
 
-	def _GET(self, path, data=None, isDeserialize=True, baseURI=None, headers=None, method='GET'):
+	def _GET(self, path, data=None, isDeserialize=True, headers=None, method='GET'):
+		# set self.__baseURI
+		if not self.__baseURI:
+			if self.token:
+				self.__baseURI = self.token.getEndpointURL(self._serviceType)
+			else:
+				self.__baseURI = self.getEndpointURL(self._serviceType)
+
+			if self.baseURIPrefix:
+				self.__baseURI += self.baseURIPrefix
+
 		if data:
 			data = bytes(json.dumps(data), 'utf8')
 		req = Request(
-				url=(baseURI or self.baseURI)+path,
+				url=self.__baseURI + '/' + path,
 				headers=self._getHeaders(headers),
 				method=method,
 				data=data,
@@ -44,21 +59,24 @@ class API:
 		return self._GET(path, data, *args, method='PUT', **nargs)
 
 class Token(API):
-	baseURI = 'https://identity.tyo1.conoha.io'
+	_serviceType = 'identity'
+	conf = None
 	token = None
 	tenantId = None
 
-	def __init__(self, userName, password, tenantId=None):
-		path = '/v2.0/tokens'
+	def __init__(self, conf):
+		super().__init__()
+		self.conf = conf
+		path = 'tokens'
 		data = { 'auth':{
 			'passwordCredentials':{
-				'username': userName,
-				'password': password,
+				'username': conf.get('api', 'user'),
+				'password': conf.get('api', 'passwd'),
 				},
 			}}
-		self.tenantId = tenantId
-		if tenantId:
-			data['auth']['passwordCredentials']['tenantId'] = tenantId
+		self.tenantId = conf.get('api', 'tenant')
+		if self.tenantId:
+			data['auth']['passwordCredentials']['tenantId'] = self.tenantId
 		res = self._POST(path, data)
 		self.token = res['access']['token']
 
@@ -66,4 +84,9 @@ class Token(API):
 		return self.tenantId
 	def getAuthToken(self):
 		return self.token['id']
+	def getEndpointURL(self, name):
+		url = self.conf.get('endpoint', name)
+		if '{TENANT_ID}' in url:
+			return url.replace('{TENANT_ID}', self.getTenantId())
+		return url
 

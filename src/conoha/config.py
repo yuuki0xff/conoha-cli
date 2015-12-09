@@ -20,17 +20,37 @@ class Config(SafeConfigParser):
 				'hard_limit': -1,
 				'allow_plans': '',
 				},
+			'endpoint': {
+				# url of endpoint in Tokyo.
+				'account': 'https://account.tyo1.conoha.io/v1/{TENANT_ID}',
+				'compute': 'https://compute.tyo1.conoha.io/v2/{TENANT_ID}',
+				'volume': 'https://block-storage.tyo1.conoha.io/v2/{TENANT_ID}',
+				'database': 'https://database-hosting.tyo1.conoha.io/v1',
+				'image': 'https://image-service.tyo1.conoha.io',
+				'dns': 'https://dns-service.tyo1.conoha.io',
+				'object': 'https://object-storage.tyo1.conoha.io/v1/nc_{TENANT_ID}',
+				'mail': 'https://mail-hosting.tyo1.conoha.io/v1',
+				'identity': 'https://identity.tyo1.conoha.io/v2.0',
+				'network': 'https://networking.tyo1.conoha.io',
+				},
 			}
 
-	def __init__(self):
+	def __init__(self, fromFile=None, fromDict=None):
 		super().__init__()
+		assert(not(fromFile and fromDict))
+
 		self._setDefaultValue()
 		self._readEnv()
-		os.environ.setdefault('XDG_CONFIG_HOME', '~/.config')
-		self.read(self._pathExpand_([
-			'$XDG_CONFIG_HOME/conoha/config',
-			'~/.conoha/conifg',
-			]))
+		if fromFile:
+			self.read_file(open(fromFile))
+		elif fromDict:
+			self.read_dict(fromDict)
+		else:
+			os.environ.setdefault('XDG_CONFIG_HOME', '~/.config')
+			self.read(self._pathExpand_([
+				'$XDG_CONFIG_HOME/conoha/config',
+				'~/.conoha/conifg',
+				]))
 
 	def _pathExpand_(self, pathList):
 		for i, item in enumerate(pathList):
