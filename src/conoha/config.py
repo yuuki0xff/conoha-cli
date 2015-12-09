@@ -6,6 +6,39 @@ from configparser import SafeConfigParser
 __ALL__ = 'Config'.split()
 
 class Config(SafeConfigParser):
+	endpoint = {
+			'japan': {
+				'account': 'https://account.tyo1.conoha.io/v1/{TENANT_ID}',
+				'compute': 'https://compute.tyo1.conoha.io/v2/{TENANT_ID}',
+				'volume': 'https://block-storage.tyo1.conoha.io/v2/{TENANT_ID}',
+				'database': 'https://database-hosting.tyo1.conoha.io/v1',
+				'image': 'https://image-service.tyo1.conoha.io',
+				'dns': 'https://dns-service.tyo1.conoha.io',
+				'object': 'https://object-storage.tyo1.conoha.io/v1/nc_{TENANT_ID}',
+				'mail': 'https://mail-hosting.tyo1.conoha.io/v1',
+				'identity': 'https://identity.tyo1.conoha.io/v2.0',
+				'network': 'https://networking.tyo1.conoha.io',
+			},
+			'singapore': {
+				'compute': 'https://compute.sin1.conoha.io/v2/{TENANT_ID}',
+				'volume': 'https://block-storage.sin1.conoha.io/v2/{TENANT_ID}',
+				'database': 'https://database-hosting.sin1.conoha.io/v1',
+				'image': 'https://image-service.sin1.conoha.io',
+				'mail': 'https://mail-hosting.sin1.conoha.io/v1',
+				'identity': 'https://identity.sin1.conoha.io/v2.0',
+				'network': 'https://networking.sin1.conoha.io',
+			},
+			'usa': {
+				'compute': 'https://compute.sjc1.conoha.io/v2/{TENANT_ID}',
+				'volume': 'https://block-storage.sjc1.conoha.io/v2/{TENANT_ID}',
+				'database': 'https://database-hosting.sjc1.conoha.io',
+				'image': 'https://image-service.sjc1.conoha.io',
+				'mail': 'https://mail-hosting.sjc1.conoha.io/v1',
+				'identity': 'https://identity.sjc1.conoha.io/v2.0',
+				'network': 'https://networking.sjc1.conoha.io',
+			},
+		}
+
 	_defaultValue = {
 			'api': {
 				'user': '',
@@ -21,17 +54,7 @@ class Config(SafeConfigParser):
 				'allow_plans': '',
 				},
 			'endpoint': {
-				# url of endpoint in Tokyo.
-				'account': 'https://account.tyo1.conoha.io/v1/{TENANT_ID}',
-				'compute': 'https://compute.tyo1.conoha.io/v2/{TENANT_ID}',
-				'volume': 'https://block-storage.tyo1.conoha.io/v2/{TENANT_ID}',
-				'database': 'https://database-hosting.tyo1.conoha.io/v1',
-				'image': 'https://image-service.tyo1.conoha.io',
-				'dns': 'https://dns-service.tyo1.conoha.io',
-				'object': 'https://object-storage.tyo1.conoha.io/v1/nc_{TENANT_ID}',
-				'mail': 'https://mail-hosting.tyo1.conoha.io/v1',
-				'identity': 'https://identity.tyo1.conoha.io/v2.0',
-				'network': 'https://networking.tyo1.conoha.io',
+				'region': 'japan',
 				},
 			}
 

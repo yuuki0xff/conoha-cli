@@ -85,7 +85,8 @@ class Token(API):
 	def getAuthToken(self):
 		return self.token['id']
 	def getEndpointURL(self, name):
-		url = self.conf.get('endpoint', name)
+		url = self.conf.get('endpoint', name, fallback=None) or self.conf.endpoint[self.conf.get('endpoint', 'region')][name]
+		assert(url)
 		if '{TENANT_ID}' in url:
 			return url.replace('{TENANT_ID}', self.getTenantId())
 		return url
