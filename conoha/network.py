@@ -4,12 +4,14 @@ from .api import API
 class NetworkAPI(API):
 	_serviceType = 'network'
 
+	def __init__(self, token, baseURIPrefix=None):
+		super().__init__(token, baseURIPrefix)
 
 class SecurityGroupList(NetworkAPI):
 	_groups = None
 
 	def __init__(self, token):
-		self.token = token
+		super().__init__(token)
 		self.update()
 
 	def __iter__(self):
@@ -46,7 +48,7 @@ class SecurityGroup(NetworkAPI):
 	rules = None
 
 	def __init__(self, token, info):
-		self.token = token
+		super().__init__(token)
 		self.id_ = info['id']
 		self.name = info['name']
 		self.description = info['description']
@@ -69,7 +71,7 @@ class SecurityGroupRuleList(NetworkAPI):
 	_rules = None
 
 	def __init__(self, token, id_, info):
-		self.token = token
+		super().__init__(token)
 		self.securityGroupID = id_
 		self._rules = info
 
