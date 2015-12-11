@@ -129,8 +129,8 @@ class VM(ComputeAPI):
 	securityGroupList = None
 
 	def __init__(self, token, info):
-		super().__init__(token, baseURIPrefix='servers/' + self.vmid)
 		self.vmid = info['id']
+		super().__init__(token, baseURIPrefix='servers/' + self.vmid)
 		self.flavorId = info['flavor']['id']
 		self.hostId = info['hostId']
 		self.imageId = info['image']['id']
