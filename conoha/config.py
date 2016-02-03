@@ -88,12 +88,12 @@ class Config(SafeConfigParser):
 			if not key.startswith('CONOHA_') or len(key.split('_')) != 3:
 				continue
 
-			section = key.split('_')[1].upper()
-			if section.lower() not in self._defaultValue:
+			section = key.split('_')[1].lower()
+			if section not in self._defaultValue:
 				continue
 
-			parameter = key.split('_')[2].upper()
-			if parameter.lower() not in self._defaultValue[section]:
+			parameter = key.split('_')[2].lower()
+			if parameter not in self._defaultValue[section]:
 				continue
 
 			if section and parameter:
