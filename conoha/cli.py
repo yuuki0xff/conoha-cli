@@ -63,9 +63,11 @@ class ComputeCommand():
 
 		addVmParser = subparser.add_parser('add-vm')
 		addVmParser.add_argument('--quiet', action='store_true')
-		addVmParser.add_argument('--name', type=str)
-		addVmParser.add_argument('--imageid', type=str)
-		addVmParser.add_argument('--planid', type=str)
+		addVmParser.add_argument('--name', type=str)        # for backward compatibility
+		addVmParser.add_argument('--image', type=str)
+		addVmParser.add_argument('--imageid', type=str)     # for backward compatibility
+		addVmParser.add_argument('--plan', type=str)
+		addVmParser.add_argument('--planid', type=str)      # for backward compatibility
 		addVmParser.add_argument('--passwd', type=str)
 		addVmParser.add_argument('--key', type=str)
 		addVmParser.add_argument('--group-names', type=str)
@@ -141,7 +143,13 @@ class ComputeCommand():
 		groupNames = args.group_names and args.group_names.split(',')
 
 		vmlist = VMList(token)
-		vmid = vmlist.add(args.imageid, args.planid, adminPass=args.passwd, keyName=args.key, name=args.name, securityGroupNames=groupNames)
+		vmid = vmlist.add(
+				args.imageid or vmlist[args.image].imageid,
+				args.planid or vmlist[args.plan].planid,
+				adminPass=args.passwd,
+				keyName=args.key,
+				name=args.name,
+				securityGroupNames=groupNames)
 		if not args.quiet:
 			print(vmid)
 
@@ -199,12 +207,14 @@ class NetworkCommand():
 
 		listRules = subparser.add_parser('list-rules')
 		listRules.add_argument('--verbose', action='store_true')
-		listRules.add_argument('--id', type=str)
-		listRules.add_argument('--name', type=str)
+		listRules.add_argument('--group', type=str)
+		listRules.add_argument('--id', type=str)        # for backward compatibility
+		listRules.add_argument('--name', type=str)      # for backward compatibility
 		listRules.set_defaults(func=cls.listRules)
 
 		addRule = subparser.add_parser('add-rule')
-		addRule.add_argument('--id', type=str)
+		addRule.add_argument('--group', type=str)
+		addRule.add_argument('--id', type=str)          # for backward compatibility
 		addRule.add_argument('--direction', type=str)
 		addRule.add_argument('--ethertype', type=str)
 		addRule.add_argument('--port', type=str)
@@ -213,7 +223,8 @@ class NetworkCommand():
 		addRule.set_defaults(func=cls.addRule)
 
 		delRule = subparser.add_parser('delete-rule')
-		delRule.add_argument('--group-id', type=str)
+		delRule.add_argument('--group', type=str)
+		delRule.add_argument('--group-id', type=str)    # for backward compatibility
 		delRule.add_argument('--rule-id', type=str)
 		delRule.set_defaults(func=cls.deleteRule)
 
@@ -239,7 +250,7 @@ class NetworkCommand():
 	@classmethod
 	def listRules(cls, token, args):
 		sglist = SecurityGroupList(token)
-		sg = sglist.getSecurityGroup(sgid=args.id, name=args.name)
+		sg = sglist[args.group or args.id or args.name]
 
 		for rule in sg.rules:
 			if args.verbose:
@@ -251,7 +262,7 @@ class NetworkCommand():
 	@classmethod
 	def addRule(cls, token, args):
 		sglist = SecurityGroupList(token)
-		sg = sglist.getSecurityGroup(sgid=args.id)
+		sg = sglist[args.group or args.id]
 
 		portMin = None
 		portMax = None
@@ -266,7 +277,7 @@ class NetworkCommand():
 	@classmethod
 	def deleteRule(cls, token, args):
 		sglist = SecurityGroupList(token)
-		sg = sglist.getSecurityGroup(sgid=args.group_id)
+		sg = sglist[args.group or args.group_id]
 		sg.rules.delete(args.rule_id)
 
 if __name__ == '__main__':
