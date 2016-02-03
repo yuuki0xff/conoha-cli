@@ -37,16 +37,20 @@ conoha-cli network delete-rule \[--group SECURITY\_GROUP\_ID | SECURITY\_GROUP\_
 Library Usage
 -------------
 ```
-from conoha.API import Token
+from conoha.config import Config
+from conoha.api import Token
 from conoha.compute import VMList
 
-userName = ''
-password = ''
-tenantId = ''
-
-token = Token(userName=userName, password=password, tenantId=tenantId)
+configDict = {
+	'api': {
+		'user':   'xxxxx',
+		'passwd': 'xxxxx',
+		'tenant': 'xxxxx',
+	}
+}
+conf = Config(fromDict=configDict)
+token = Token(conf)
 for vm in VMList(token):
 	if vm.getStatus() == 'SHUTOFF':
 		vm.start()
-
 ```
