@@ -2,18 +2,11 @@
 from .api import API
 
 class ComputeAPI(API):
-	_serviceType = 'compute'
-
 	def __init__(self, token, baseURIPrefix=None):
 		super().__init__(token, baseURIPrefix)
+		self._serviceType = 'compute'
 
 class VMPlan(ComputeAPI):
-	planId = None
-	name = None
-	disk = None
-	ram = None
-	vcpus = None
-
 	def __init__(self, data):
 		self.planId = data['id']
 		self.name = data['name']
@@ -22,8 +15,6 @@ class VMPlan(ComputeAPI):
 		self.vcpus = data['vcpus']
 
 class VMPlanList(ComputeAPI):
-	_flavors = None
-
 	def __init__(self, token):
 		super().__init__(token)
 		path = 'flavors/detail'
@@ -40,15 +31,6 @@ class VMPlanList(ComputeAPI):
 				return plan
 
 class VMImage(ComputeAPI):
-	imageId = None
-	name = None
-	minDisk = None
-	minRam = None
-	progress = None
-	status = None
-	created = None
-	updated = None
-
 	def __init__(self, data):
 		self.imageId = data['id']
 		self.name = data['name']
@@ -60,8 +42,6 @@ class VMImage(ComputeAPI):
 		self.updated = data['updated']
 
 class VMImageList(ComputeAPI):
-	_images = None
-
 	def __init__(self, token):
 		super().__init__(token)
 		path = 'images/detail'
@@ -78,10 +58,9 @@ class VMImageList(ComputeAPI):
 				return img
 
 class VMList(ComputeAPI):
-	_servers = None
-
 	def __init__(self, token):
 		super().__init__(token)
+		self._servers = None
 		self.update()
 
 	def __iter__(self):
@@ -131,18 +110,6 @@ class VMList(ComputeAPI):
 		self._servers = None
 
 class VM(ComputeAPI):
-	vmid = None
-	flavorId = None
-	hostId = None
-	imageId = None
-	tenantId = None
-	name = None
-	status = None
-	created = None
-	updated = None
-	addressList = None
-	securityGroupList = None
-
 	def __init__(self, token, info):
 		self.vmid = info['id']
 		super().__init__(token, baseURIPrefix='servers/' + self.vmid)
@@ -154,9 +121,6 @@ class VM(ComputeAPI):
 			self.name = info['metadata']['instance_name_tag']
 		except KeyError:
 			self.name = info['name']
-		self.status = info['status']
-		self.created = info['created']
-		self.updated = info['updated']
 		self.status = info['status']
 		self.created = info['created']
 		self.updated = info['updated']
@@ -186,10 +150,9 @@ class VM(ComputeAPI):
 		return res['server']['status']
 
 class KeyList(ComputeAPI):
-	_keys = None
-
 	def __init__(self, token):
 		super().__init__(token)
+		self._keys = None
 		self.update()
 
 	def __iter__(self):
@@ -239,11 +202,6 @@ class KeyList(ComputeAPI):
 		self._keys = None
 
 class Key(ComputeAPI):
-	name = None
-	fingerprint = None
-	publicKey = None
-	privateKey = None
-
 	def __init__(self, info):
 		self.name = info['name']
 		self.fingerprint = info['fingerprint']

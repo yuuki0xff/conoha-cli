@@ -57,13 +57,9 @@ class API:
 		return self._GET(path, data, *args, method='PUT', **nargs)
 
 class Token(API):
-	_serviceType = 'identity'
-	conf = None
-	token = None
-	tenantId = None
-
 	def __init__(self, conf):
 		super().__init__()
+		self._serviceType = 'identity'
 		self.conf = conf
 		path = 'tokens'
 		data = { 'auth':{

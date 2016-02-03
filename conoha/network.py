@@ -2,16 +2,14 @@
 from .api import API
 
 class NetworkAPI(API):
-	_serviceType = 'network'
-
 	def __init__(self, token, baseURIPrefix=None):
 		super().__init__(token, baseURIPrefix)
+		self._serviceType = 'network'
 
 class SecurityGroupList(NetworkAPI):
-	_groups = None
-
 	def __init__(self, token):
 		super().__init__(token)
+		self._groups = None
 		self.update()
 
 	def __iter__(self):
@@ -47,11 +45,6 @@ class SecurityGroupList(NetworkAPI):
 		self._DELETE('security-groups/{}'.format(securityGroupID), isDeserialize=False)
 
 class SecurityGroup(NetworkAPI):
-	id_ = None
-	name = None
-	description = None
-	rules = None
-
 	def __init__(self, token, info):
 		super().__init__(token)
 		self.id_ = info['id']
@@ -72,9 +65,6 @@ class SecurityGroup(NetworkAPI):
 		self._PUT('security-groups/{}'.format(self.id_), data)
 
 class SecurityGroupRuleList(NetworkAPI):
-	securityGroupID = None
-	_rules = None
-
 	def __init__(self, token, id_, info):
 		super().__init__(token)
 		self.securityGroupID = id_
@@ -118,14 +108,6 @@ class SecurityGroupRuleList(NetworkAPI):
 		self._DELETE('security-group-rules/{}'.format(securityGroupRuleID), isDeserialize=False)
 
 class SecurityGroupRule(NetworkAPI):
-	id_ = None
-	direction = None
-	ethertype = None
-	rangeMin = None
-	rangeMax = None
-	protocol = None
-	remoteIPPrefix = None
-
 	def __init__(self, info):
 		self.id_ = info['id']
 		self.direction = info['direction']
