@@ -5,12 +5,10 @@ import json
 __ALL__ = 'API Tenant'.split()
 
 class API:
-	__baseURI = None
-	token = None
-	_serviceType = None
-
 	def __init__(self, token=None, baseURIPrefix=None):
+		self.__baseURI = None
 		self.token = token
+		self._serviceType = None
 		self.baseURIPrefix = baseURIPrefix
 
 	def _getHeaders(self, h):
@@ -32,12 +30,12 @@ class API:
 				self.__baseURI = self.getEndpointURL(self._serviceType)
 
 			if self.baseURIPrefix:
-				self.__baseURI += self.baseURIPrefix
+				self.__baseURI += '/' + self.baseURIPrefix
 
 		if data:
 			data = bytes(json.dumps(data), 'utf8')
 		req = Request(
-				url=self.__baseURI + '/' + path,
+				url=self.__baseURI + ('/' + path if path else ''),   # 末尾の'/'はつけない
 				headers=self._getHeaders(headers),
 				method=method,
 				data=data,
@@ -88,6 +86,6 @@ class Token(API):
 		url = self.conf.get('endpoint', name, fallback=None) or self.conf.endpoint[self.conf.get('endpoint', 'region')][name]
 		assert(url)
 		if '{TENANT_ID}' in url:
-			return url.replace('{TENANT_ID}', self.getTenantId())
-		return url
+			url = url.replace('{TENANT_ID}', self.getTenantId())
+		return url.rstrip('/')
 
