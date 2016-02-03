@@ -21,6 +21,11 @@ class SecurityGroupList(NetworkAPI):
 		for g in self._groups:
 			yield SecurityGroup(self.token, g)
 
+	def __getitem__(self, key):
+		for group in self:
+			if key in [group.id_, group.name]:
+				return group
+
 	def update(self):
 		res = self._GET('security-groups')
 		self._groups = res['security_groups']
@@ -81,6 +86,11 @@ class SecurityGroupRuleList(NetworkAPI):
 
 		for r in self._rules:
 			yield SecurityGroupRule(r)
+
+	def __getitem__(self, key):
+		for rule in self:
+			if key in [rule.id_]:
+				return rule
 
 	def update(self): pass
 	def add(self, direction, ethertype, portMin=None, portMax=None, protocol=None, remoteIPPrefix=None):

@@ -34,6 +34,11 @@ class VMPlanList(ComputeAPI):
 		for f in self._flavors:
 			yield VMPlan(f)
 
+	def __getitem__(self, key):
+		for plan in self:
+			if key in [plan.planId, plan.name]:
+				return plan
+
 class VMImage(ComputeAPI):
 	imageId = None
 	name = None
@@ -67,6 +72,11 @@ class VMImageList(ComputeAPI):
 		for i in self._images:
 			yield VMImage(i)
 
+	def __getitem__(self, key):
+		for img in self:
+			if key in [img.imageId, img.name]:
+				return img
+
 class VMList(ComputeAPI):
 	_servers = None
 
@@ -80,6 +90,11 @@ class VMList(ComputeAPI):
 
 		for v in self._servers:
 			yield VM(self.token, v)
+
+	def __getitem__(self, key):
+		for vm in self:
+			if key in [vm.vmid, vm.name]:
+				return vm
 
 	def update(self):
 		res = self._GET('servers/detail')
@@ -184,9 +199,14 @@ class KeyList(ComputeAPI):
 		for key in self._keys:
 			yield Key(key)
 
+	def __getitem__(self, keyname):
+		for keyobj in self:
+			if keyname in [keyobj.name, keyobj.fingerprint]:
+				return keyobj
+
 	def update(self):
 		res = self._GET('os-keypairs')
-		self._keys = (keypair['keypair'] for keypair in res['keypairs'])
+		self._keys = list(keypair['keypair'] for keypair in res['keypairs'])
 
 	def add(self, name, publicKey=None, publicKeyFile=None):
 		"""
