@@ -2,14 +2,14 @@
 from .api import API
 
 class NetworkAPI(API):
-	_serviceType = 'network'
-
+	def __init__(self, token, baseURIPrefix=None):
+		super().__init__(token, baseURIPrefix)
+		self._serviceType = 'network'
 
 class SecurityGroupList(NetworkAPI):
-	_groups = None
-
 	def __init__(self, token):
-		self.token = token
+		super().__init__(token)
+		self._groups = None
 		self.update()
 
 	def __iter__(self):
@@ -18,6 +18,11 @@ class SecurityGroupList(NetworkAPI):
 
 		for g in self._groups:
 			yield SecurityGroup(self.token, g)
+
+	def __getitem__(self, key):
+		for group in self:
+			if key in [group.id_, group.name]:
+				return group
 
 	def update(self):
 		res = self._GET('security-groups')
@@ -40,13 +45,8 @@ class SecurityGroupList(NetworkAPI):
 		self._DELETE('security-groups/{}'.format(securityGroupID), isDeserialize=False)
 
 class SecurityGroup(NetworkAPI):
-	id_ = None
-	name = None
-	description = None
-	rules = None
-
 	def __init__(self, token, info):
-		self.token = token
+		super().__init__(token)
 		self.id_ = info['id']
 		self.name = info['name']
 		self.description = info['description']
@@ -65,11 +65,8 @@ class SecurityGroup(NetworkAPI):
 		self._PUT('security-groups/{}'.format(self.id_), data)
 
 class SecurityGroupRuleList(NetworkAPI):
-	securityGroupID = None
-	_rules = None
-
 	def __init__(self, token, id_, info):
-		self.token = token
+		super().__init__(token)
 		self.securityGroupID = id_
 		self._rules = info
 
@@ -79,6 +76,11 @@ class SecurityGroupRuleList(NetworkAPI):
 
 		for r in self._rules:
 			yield SecurityGroupRule(r)
+
+	def __getitem__(self, key):
+		for rule in self:
+			if key in [rule.id_]:
+				return rule
 
 	def update(self): pass
 	def add(self, direction, ethertype, portMin=None, portMax=None, protocol=None, remoteIPPrefix=None):
@@ -106,14 +108,6 @@ class SecurityGroupRuleList(NetworkAPI):
 		self._DELETE('security-group-rules/{}'.format(securityGroupRuleID), isDeserialize=False)
 
 class SecurityGroupRule(NetworkAPI):
-	id_ = None
-	direction = None
-	ethertype = None
-	rangeMin = None
-	rangeMax = None
-	protocol = None
-	remoteIPPrefix = None
-
 	def __init__(self, info):
 		self.id_ = info['id']
 		self.direction = info['direction']
