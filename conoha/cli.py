@@ -9,13 +9,44 @@ from conoha.network import SecurityGroupList
 from tabulate import tabulate
 import functools
 
-def prettyPrint(func):
-	@functools.wraps(func)
-	def wrapper(cls, token, args):
-		output = func(cls, token, args)
-		if output:
-			print(tabulate(output, headers='firstrow'))
-	return wrapper
+def prettyPrint(format_=None, header=True):
+	"""
+	2つの引数(token, args)を取るクラスメソッドに対するデコレータ。
+	メソッドが返す値を整形してstdoutに出力する。
+
+	format_: 表示形式を選択
+	heder:   ヘッダーの有無を指定
+
+	注意: wrapperの引数 "args" の設定が優先される。
+	"""
+	assert(format_ is None or format_ in ['plain', 'simple'])
+
+	def receiveFunc(func):
+		@functools.wraps(func)
+		def wrapper(cls, token, args):
+			output = func(cls, token, args)
+			if output:
+				# Select first non None value
+				fmt = next((i for i in [args.format, format_] if i is not None), None)
+				header_ = next((i for i in [args.header, header] if i is not None), True)
+				assert(fmt is None or fmt in ['plain', 'simple'])
+
+				if header_:
+					print(tabulate(output, headers='firstrow', tablefmt=fmt or 'simple'))
+				else:
+					output = iter(output)
+					# Skipt first line
+					next(output)
+					print(tabulate(output, headers=[], tablefmt=fmt or 'plain'))
+		return wrapper
+	return receiveFunc
+
+def str2bool(s):
+	if s.lower() in ['yes', 'y', 'true', 't', '1']:
+		return True
+	elif s.lower() in ['no', 'n', 'false', 'f', '0']:
+		return False
+	raise '"{}" is invalid value'.format(s)
 
 def main():
 	parser = getArgumentParser()
@@ -34,6 +65,8 @@ def main():
 
 def getArgumentParser():
 	parser = ArgumentParser()
+	parser.add_argument('--format', type=str, choices=['plain', 'simple'])
+	parser.add_argument('--header', nargs='?', default=True, type=str2bool, choices=[True, False])
 	subparser = parser.add_subparsers()
 
 	parser_compute = subparser.add_parser('compute')
@@ -101,7 +134,7 @@ class ComputeCommand():
 			vmParser.set_defaults(func=vmCommands[cmd])
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def list_plans(cls, token, args):
 		plans = VMPlanList(token)
 		yield ['ID', 'Name', 'Disk', 'RAM', 'CPUs']
@@ -109,7 +142,7 @@ class ComputeCommand():
 			yield [p.planId, p.name, p.disk, p.ram, p.vcpus]
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def list_images(cls, token, args):
 		imageList = VMImageList(token)
 		# Headers
@@ -125,7 +158,7 @@ class ComputeCommand():
 				yield [img.imageId, img.name, img.status, img.created, img.updated]
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def list_keys(cls, token, args):
 		keylist = KeyList(token)
 		# Header
@@ -141,7 +174,7 @@ class ComputeCommand():
 				yield [key.name, key.fingerprint]
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def list_vms(cls, token, args):
 		vmlist = VMList(token)
 		# Header
@@ -157,19 +190,19 @@ class ComputeCommand():
 				yield [vm.vmid, vm.name, vm.status]
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def add_key(cls, token, args):
 		keylist = KeyList(token)
 		keylist.add(name=args.name, publicKey=args.key, publicKeyFile=args.file)
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def delete_key(cls, token, args):
 		keylist = KeyList(token)
 		keylist.delete(args.name)
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def add_vm(cls, token, args):
 		groupNames = args.group_names and args.group_names.split(',')
 
@@ -186,7 +219,7 @@ class ComputeCommand():
 			yield vmid
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def start_vm(cls, token, args):
 		vmlist = VMList(token)
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
@@ -194,7 +227,7 @@ class ComputeCommand():
 			vm.start()
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def stop_vm(cls, token, args):
 		vmlist = VMList(token)
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
@@ -202,7 +235,7 @@ class ComputeCommand():
 			vm.stop(args.force)
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def reboot_vm(cls, token, args):
 		vmlist = VMList(token)
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
@@ -210,7 +243,7 @@ class ComputeCommand():
 			vm.restart()
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def delete_vm(cls, token, args):
 		vmlist = VMList(token)
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
@@ -218,7 +251,7 @@ class ComputeCommand():
 			vmlist.delete(vm.vmid)
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def modify_vm(cls, token, args):
 		vmlist = VMList(token)
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
@@ -266,7 +299,7 @@ class NetworkCommand():
 		delRule.set_defaults(func=cls.deleteRule)
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def listSecurityGroups(cls, token, args):
 		sglist = SecurityGroupList(token)
 		# Header
@@ -276,21 +309,21 @@ class NetworkCommand():
 			yield [sg.id_, sg.name, sg.description]
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def addSecurityGroup(cls, token, args):
 		sglist = SecurityGroupList(token)
 		id_ = sglist.add(args.name, args.description)
 		print(id_)
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def deleteSecurityGroup(cls, token, args):
 		sglist = SecurityGroupList(token)
 		sg = sglist.getSecurityGroup(sgid=args.id, name=args.name)
 		sglist.delete(sg.id_)
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def listRules(cls, token, args):
 		sglist = SecurityGroupList(token)
 		sg = sglist[args.group or args.id or args.name]
@@ -308,7 +341,7 @@ class NetworkCommand():
 				yield [rule.direction, rule.ethertype, rule.rangeMin, rule.rangeMax, rule.protocol, rule.remoteIPPrefix]
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def addRule(cls, token, args):
 		sglist = SecurityGroupList(token)
 		sg = sglist[args.group or args.id]
@@ -324,7 +357,7 @@ class NetworkCommand():
 		sg.rules.add(args.direction, args.ethertype, portMin, portMax, args.protocol, args.remoteIPPrefix)
 
 	@classmethod
-	@prettyPrint
+	@prettyPrint()
 	def deleteRule(cls, token, args):
 		sglist = SecurityGroupList(token)
 		sg = sglist[args.group or args.group_id]
