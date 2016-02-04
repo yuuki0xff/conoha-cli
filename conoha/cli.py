@@ -6,6 +6,16 @@ from argparse import ArgumentParser, FileType
 import sys
 from conoha.compute import VMPlanList, VMImageList, VMList, KeyList
 from conoha.network import SecurityGroupList
+from tabulate import tabulate
+import functools
+
+def prettyPrint(func):
+	@functools.wraps(func)
+	def wrapper(cls, token, args):
+		output = func(cls, token, args)
+		if output:
+			print(tabulate(output, headers='firstrow'))
+	return wrapper
 
 def main():
 	parser = getArgumentParser()
@@ -91,54 +101,75 @@ class ComputeCommand():
 			vmParser.set_defaults(func=vmCommands[cmd])
 
 	@classmethod
+	@prettyPrint
 	def list_plans(cls, token, args):
 		plans = VMPlanList(token)
-		print(['ID', 'NAME', 'DISK', 'RAM', 'CPUs'])
+		yield ['ID', 'Name', 'Disk', 'RAM', 'CPUs']
 		for p in plans:
-			a = [p.planId, p.name, p.disk, p.ram, p.vcpus]
-			print(a)
+			yield [p.planId, p.name, p.disk, p.ram, p.vcpus]
 
 	@classmethod
+	@prettyPrint
 	def list_images(cls, token, args):
 		imageList = VMImageList(token)
+		# Headers
+		if args.verbose:
+			yield ['ID', 'Name', 'MinDisk', 'MinRam', 'Progress', 'Status', 'Created', 'Updated']
+		else:
+			yield ['ID', 'Name', 'Status', 'Created', 'Updated']
+		# Body
 		for img in imageList:
 			if args.verbose:
-				a = [img.imageId, img.name, img.minDisk, img.minRam, img.progress, img.status, img.created, img.updated]
+				yield [img.imageId, img.name, img.minDisk, img.minRam, img.progress, img.status, img.created, img.updated]
 			else:
-				a = [img.imageId, img.name, img.status, img.created, img.updated]
-			print(a)
+				yield [img.imageId, img.name, img.status, img.created, img.updated]
 
 	@classmethod
+	@prettyPrint
 	def list_keys(cls, token, args):
 		keylist = KeyList(token)
+		# Header
+		if args.verbose:
+			yield ['Name', 'PublicKey', 'FingerPrint']
+		else:
+			yield ['Name', 'FingerPrint']
+		# Body
 		for key in keylist:
 			if args.verbose:
-				a = [key.name, key.publicKey, key.fingerprint]
+				yield [key.name, key.publicKey, key.fingerprint]
 			else:
-				a = [key.name, key.fingerprint]
-			print(a)
+				yield [key.name, key.fingerprint]
 
 	@classmethod
+	@prettyPrint
 	def list_vms(cls, token, args):
 		vmlist = VMList(token)
+		# Header
+		if args.verbose:
+			yield ['VMID', 'FlavorID', 'HostID', 'ImageID', 'TenantID', 'Name', 'Status', 'Created', 'Updated', 'AddressList', 'SecuretyGroupList']
+		else:
+			yield ['VMID', 'Name', 'Status']
+		# Body
 		for vm in vmlist:
 			if args.verbose:
-				a = [vm.vmid, vm.flavorId, vm.hostId, vm.imageId, vm.tenantId, vm.name, vm.status, vm.created, vm.updated, vm.addressList, vm.securityGroupList]
+				yield [vm.vmid, vm.flavorId, vm.hostId, vm.imageId, vm.tenantId, vm.name, vm.status, vm.created, vm.updated, vm.addressList, vm.securityGroupList]
 			else:
-				a = [vm.vmid, vm.name, vm.status]
-			print(a)
+				yield [vm.vmid, vm.name, vm.status]
 
 	@classmethod
+	@prettyPrint
 	def add_key(cls, token, args):
 		keylist = KeyList(token)
 		keylist.add(name=args.name, publicKey=args.key, publicKeyFile=args.file)
 
 	@classmethod
+	@prettyPrint
 	def delete_key(cls, token, args):
 		keylist = KeyList(token)
 		keylist.delete(args.name)
 
 	@classmethod
+	@prettyPrint
 	def add_vm(cls, token, args):
 		groupNames = args.group_names and args.group_names.split(',')
 
@@ -151,9 +182,11 @@ class ComputeCommand():
 				name=args.name,
 				securityGroupNames=groupNames)
 		if not args.quiet:
-			print(vmid)
+			yield 'VMID'
+			yield vmid
 
 	@classmethod
+	@prettyPrint
 	def start_vm(cls, token, args):
 		vmlist = VMList(token)
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
@@ -161,6 +194,7 @@ class ComputeCommand():
 			vm.start()
 
 	@classmethod
+	@prettyPrint
 	def stop_vm(cls, token, args):
 		vmlist = VMList(token)
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
@@ -168,6 +202,7 @@ class ComputeCommand():
 			vm.stop(args.force)
 
 	@classmethod
+	@prettyPrint
 	def reboot_vm(cls, token, args):
 		vmlist = VMList(token)
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
@@ -175,6 +210,7 @@ class ComputeCommand():
 			vm.restart()
 
 	@classmethod
+	@prettyPrint
 	def delete_vm(cls, token, args):
 		vmlist = VMList(token)
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
@@ -182,6 +218,7 @@ class ComputeCommand():
 			vmlist.delete(vm.vmid)
 
 	@classmethod
+	@prettyPrint
 	def modify_vm(cls, token, args):
 		vmlist = VMList(token)
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
@@ -229,37 +266,49 @@ class NetworkCommand():
 		delRule.set_defaults(func=cls.deleteRule)
 
 	@classmethod
+	@prettyPrint
 	def listSecurityGroups(cls, token, args):
 		sglist = SecurityGroupList(token)
+		# Header
+		yield ['ID', 'Name', 'Description']
+		# Body
 		for sg in sglist:
-			a = [sg.id_, sg.name, sg.description]
-			print(a)
+			yield [sg.id_, sg.name, sg.description]
 
 	@classmethod
+	@prettyPrint
 	def addSecurityGroup(cls, token, args):
 		sglist = SecurityGroupList(token)
 		id_ = sglist.add(args.name, args.description)
 		print(id_)
 
 	@classmethod
+	@prettyPrint
 	def deleteSecurityGroup(cls, token, args):
 		sglist = SecurityGroupList(token)
 		sg = sglist.getSecurityGroup(sgid=args.id, name=args.name)
 		sglist.delete(sg.id_)
 
 	@classmethod
+	@prettyPrint
 	def listRules(cls, token, args):
 		sglist = SecurityGroupList(token)
 		sg = sglist[args.group or args.id or args.name]
 
+		# Header
+		if args.verbose:
+			yield ['ID', 'Direction', 'EtherType', 'RangeMin', 'RangeMax', 'Protocol', 'RemoteIPPrefix']
+		else:
+			yield ['Direction', 'EtherType', 'RangeMin', 'RangeMax', 'Protocol', 'RemoteIPPrefix']
+		# Body
 		for rule in sg.rules:
 			if args.verbose:
-				a = [rule.id_, rule.direction, rule.ethertype, rule.rangeMin, rule.rangeMax, rule.protocol, rule.remoteIPPrefix]
+				yield [rule.id_, rule.direction, rule.ethertype, rule.rangeMin, rule.rangeMax, rule.protocol, rule.remoteIPPrefix]
 			else:
-				a = [rule.direction, rule.ethertype, rule.rangeMin, rule.rangeMax, rule.protocol, rule.remoteIPPrefix]
-			print(a)
+				yield [rule.direction, rule.ethertype, rule.rangeMin, rule.rangeMax, rule.protocol, rule.remoteIPPrefix]
 
 	@classmethod
+	@prettyPrint
 	def addRule(cls, token, args):
 		sglist = SecurityGroupList(token)
 		sg = sglist[args.group or args.id]
@@ -275,6 +324,7 @@ class NetworkCommand():
 		sg.rules.add(args.direction, args.ethertype, portMin, portMax, args.protocol, args.remoteIPPrefix)
 
 	@classmethod
+	@prettyPrint
 	def deleteRule(cls, token, args):
 		sglist = SecurityGroupList(token)
 		sg = sglist[args.group or args.group_id]

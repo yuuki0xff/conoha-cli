@@ -10,6 +10,7 @@ setup(name='conoha-cli',
       license='MIT',
       packages=['conoha'],
       zip_safe=False,
+      install_requires=['tabulate'],
       entry_points={
 		  'console_scripts': [
 			  'conoha-cli = conoha.cli:main',
