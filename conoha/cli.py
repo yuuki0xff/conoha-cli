@@ -9,6 +9,8 @@ from conoha.network import SecurityGroupList
 from tabulate import tabulate
 import functools
 
+formatters = ('plain', 'simple', 'vertical')
+
 def prettyPrint(format_=None, header=True):
 	"""
 	2つの引数(token, args)を取るクラスメソッドに対するデコレータ。
@@ -21,6 +23,42 @@ def prettyPrint(format_=None, header=True):
 	"""
 	assert(format_ is None or format_ in ['plain', 'simple'])
 
+	def verticalFormatter(table, header_):
+		headerRow = list(next(table))
+		headerWidth = max(len(i) for i in headerRow) if header_ else 0
+		spaceWidth = 2 if header_ else 0
+		valueColWidth = 0
+		rows = 0
+		rowsWidth = None
+		output = []
+		outputStr = ""
+
+		for rowNo, row in enumerate(table):
+			# rowの値をすべて文字列に変換
+			row = list(str(i) for i in row)
+
+			rows = rowNo
+			valueColWidth = max([valueColWidth, max(len(i) for i in row),])
+			# 縦横を逆に
+			if header_:
+				output.append(zip(headerRow, row))
+			else:
+				output.append(row)
+#             for headerCell, cell in zip(headerRow, row):
+#                 if header_:
+#                     yield [headerCell, cell]
+#                 else:
+#                     yield [cell]
+		rowsWidth = len(str(rows))
+		separateStr = '*'*(int((headerWidth + spaceWidth + valueColWidth - 2 - rowsWidth)/2))
+		for rowNo, row in enumerate(output):
+			outputStr += ' '.join([separateStr, str(rowNo).center(rowsWidth), separateStr]) + '\n'
+			if header_:
+				outputStr += '\n'.join(h.ljust(headerWidth) + ' '*spaceWidth + v for h,v in row) + '\n'
+			else:
+				outputStr += '\n'.join(row) + '\n'
+		return outputStr
+
 	def receiveFunc(func):
 		@functools.wraps(func)
 		def wrapper(cls, token, args):
@@ -29,15 +67,20 @@ def prettyPrint(format_=None, header=True):
 				# Select first non None value
 				fmt = next((i for i in [args.format, format_] if i is not None), None)
 				header_ = next((i for i in [args.header, header] if i is not None), True)
-				assert(fmt is None or fmt in ['plain', 'simple'])
+				assert(fmt is None or fmt in formatters)
 
-				if header_:
-					print(tabulate(output, headers='firstrow', tablefmt=fmt or 'simple'))
+				if fmt == 'vertical':
+					# use verticalFormatter
+					print(verticalFormatter(output, header_))
 				else:
-					output = iter(output)
-					# Skipt first line
-					next(output)
-					print(tabulate(output, headers=[], tablefmt=fmt or 'plain'))
+					# use tabulate
+					if header_:
+						print(tabulate(output, headers='firstrow', tablefmt=fmt or 'simple'))
+					else:
+						output = iter(output)
+						# Skipt first line
+						next(output)
+						print(tabulate(output, headers=[], tablefmt=fmt or 'plain'))
 		return wrapper
 	return receiveFunc
 
@@ -65,7 +108,7 @@ def main():
 
 def getArgumentParser():
 	parser = ArgumentParser()
-	parser.add_argument('--format', type=str, choices=['plain', 'simple'])
+	parser.add_argument('--format', type=str, choices=formatters)
 	parser.add_argument('--header', nargs='?', default=True, type=str2bool, choices=[True, False])
 	subparser = parser.add_subparsers()
 
