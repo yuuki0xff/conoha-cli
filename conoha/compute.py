@@ -1,6 +1,8 @@
 
 from .api import API
 
+__all__ = "VMPlan VMPlanList VMImage VMImageList VMList VM KeyList Key".split()
+
 class ComputeAPI(API):
 	def __init__(self, token, baseURIPrefix=None):
 		super().__init__(token, baseURIPrefix)

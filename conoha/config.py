@@ -3,7 +3,7 @@
 import os
 from configparser import SafeConfigParser
 
-__ALL__ = 'Config'.split()
+__all__ = 'Config'.split()
 
 class Config(SafeConfigParser):
 	endpoint = {

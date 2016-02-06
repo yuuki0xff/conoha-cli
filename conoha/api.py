@@ -2,7 +2,8 @@
 # -*- coding: utf8 -*-
 from urllib.request import Request, urlopen
 import json
-__ALL__ = 'API Tenant'.split()
+
+__all__ = 'API Tenant'.split()
 
 class API:
 	def __init__(self, token=None, baseURIPrefix=None):

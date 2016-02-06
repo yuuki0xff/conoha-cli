@@ -1,6 +1,8 @@
 
 from .api import API
 
+__all__ = "SecurityGroupList SecurityGroup SecurityGroupRuleList SecurityGroupRule".split()
+
 class NetworkAPI(API):
 	def __init__(self, token, baseURIPrefix=None):
 		super().__init__(token, baseURIPrefix)
