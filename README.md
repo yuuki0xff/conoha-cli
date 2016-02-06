@@ -7,6 +7,25 @@ Installation
 from PIP : ``` pip install conoha-cli ```  
 from Source : ``` ./setup.py install ```  
 
+Configuration
+-------------
+### Environment`
+```
+# ~/.bashrc
+export CONOHA_API_USER='xxxxx'
+export CONOHA_API_PASSWD='xxxxx'
+export CONOHA_API_TENANT='xxxxx'
+```
+
+### Config File
+Create file like this to ~/.config/conoha/config.
+```
+[api]
+usre = xxxxx
+passwd = xxxxx
+tenant = xxxxx
+```
+
 Command Usage
 -------------
 ### Compute Service
