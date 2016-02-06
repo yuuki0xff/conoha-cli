@@ -1,5 +1,5 @@
 
-from .api import API
+from .api import API, CustomList
 
 __all__ = "SecurityGroupList SecurityGroup SecurityGroupRuleList SecurityGroupRule".split()
 
@@ -8,27 +8,19 @@ class NetworkAPI(API):
 		super().__init__(token, baseURIPrefix)
 		self._serviceType = 'network'
 
-class SecurityGroupList(NetworkAPI):
+class SecurityGroupList(NetworkAPI, CustomList):
 	def __init__(self, token):
 		super().__init__(token)
-		self._groups = None
+		CustomList.__init__(self)
 		self.update()
 
-	def __iter__(self):
-		if self._groups is None:
-			self.update()
-
-		for g in self._groups:
-			yield SecurityGroup(self.token, g)
-
-	def __getitem__(self, key):
-		for group in self:
-			if key in [group.id_, group.name]:
-				return group
+	def _getitem(self, key, item):
+		return key in [item.id_, item.name]
 
 	def update(self):
 		res = self._GET('security-groups')
-		self._groups = res['security_groups']
+		self.clear()
+		self.extend(SecurityGroup(self.token, i) for i in res['security_groups'])
 
 	def getSecurityGroup(self, sgid=None, name=None):
 		for sg in self:
@@ -66,23 +58,15 @@ class SecurityGroup(NetworkAPI):
 			}}
 		self._PUT('security-groups/{}'.format(self.id_), data)
 
-class SecurityGroupRuleList(NetworkAPI):
+class SecurityGroupRuleList(NetworkAPI, CustomList):
 	def __init__(self, token, id_, info):
 		super().__init__(token)
+		CustomList.__init__(self)
 		self.securityGroupID = id_
-		self._rules = info
+		self.extend(SecurityGroupRule(i) for i in info)
 
-	def __iter__(self):
-		if self._rules is None:
-			self.update()
-
-		for r in self._rules:
-			yield SecurityGroupRule(r)
-
-	def __getitem__(self, key):
-		for rule in self:
-			if key in [rule.id_]:
-				return rule
+	def _getitem(self, key, item):
+		return key in [item.id_]
 
 	def update(self): pass
 	def add(self, direction, ethertype, portMin=None, portMax=None, protocol=None, remoteIPPrefix=None):

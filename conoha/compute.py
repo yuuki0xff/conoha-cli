@@ -1,5 +1,5 @@
 
-from .api import API
+from .api import API, CustomList
 
 __all__ = "VMPlan VMPlanList VMImage VMImageList VMList VM KeyList Key".split()
 
@@ -16,21 +16,16 @@ class VMPlan(ComputeAPI):
 		self.ram = data['ram']
 		self.vcpus = data['vcpus']
 
-class VMPlanList(ComputeAPI):
+class VMPlanList(ComputeAPI, CustomList):
 	def __init__(self, token):
 		super().__init__(token)
+		CustomList.__init__(self)
 		path = 'flavors/detail'
 		res = self._GET(path)
-		self._flavors = res['flavors']
+		self.extend(VMPlan(i) for i in res['flavors'])
 
-	def __iter__(self):
-		for f in self._flavors:
-			yield VMPlan(f)
-
-	def __getitem__(self, key):
-		for plan in self:
-			if key in [plan.planId, plan.name]:
-				return plan
+	def _getitem(self, key, item):
+		return key in [item.planId, item.name]
 
 class VMImage(ComputeAPI):
 	def __init__(self, data):
@@ -43,43 +38,30 @@ class VMImage(ComputeAPI):
 		self.created = data['created']
 		self.updated = data['updated']
 
-class VMImageList(ComputeAPI):
+class VMImageList(ComputeAPI, CustomList):
 	def __init__(self, token):
 		super().__init__(token)
+		CustomList.__init__(self)
 		path = 'images/detail'
 		res = self._GET(path)
-		self._images = res['images']
+		self.extend(VMImage(i) for i in res['images'])
 
-	def __iter__(self):
-		for i in self._images:
-			yield VMImage(i)
+	def _getitem(self, key, item):
+		return key in [item.imageId, item.name]
 
-	def __getitem__(self, key):
-		for img in self:
-			if key in [img.imageId, img.name]:
-				return img
-
-class VMList(ComputeAPI):
+class VMList(ComputeAPI, CustomList):
 	def __init__(self, token):
 		super().__init__(token)
-		self._servers = None
+		CustomList.__init__(self)
 		self.update()
 
-	def __iter__(self):
-		if self._servers is None:
-			self.update()
-
-		for v in self._servers:
-			yield VM(self.token, v)
-
-	def __getitem__(self, key):
-		for vm in self:
-			if key in [vm.vmid, vm.name]:
-				return vm
+	def _getitem(self, key, item):
+		return key in [item.vmid, item.name]
 
 	def update(self):
 		res = self._GET('servers/detail')
-		self._servers = res['servers']
+		self.clear()
+		self.extend(VM(self.token, i) for i in res['servers'])
 
 	def getServer(self, vmid=None, name=None):
 		for vm in self:
@@ -151,27 +133,19 @@ class VM(ComputeAPI):
 		res = self._GET('')
 		return res['server']['status']
 
-class KeyList(ComputeAPI):
+class KeyList(ComputeAPI, CustomList):
 	def __init__(self, token):
 		super().__init__(token)
-		self._keys = None
+		CustomList.__init__(self)
 		self.update()
 
-	def __iter__(self):
-		if self._keys is None:
-			self.update()
-
-		for key in self._keys:
-			yield Key(key)
-
-	def __getitem__(self, keyname):
-		for keyobj in self:
-			if keyname in [keyobj.name, keyobj.fingerprint]:
-				return keyobj
+	def _getitem(self, key, item):
+		return key in [item.name, item.fingerprint]
 
 	def update(self):
 		res = self._GET('os-keypairs')
-		self._keys = list(keypair['keypair'] for keypair in res['keypairs'])
+		self.clear()
+		self.extend(Key(keypair['keypair']) for keypair in res['keypairs'])
 
 	def add(self, name, publicKey=None, publicKeyFile=None):
 		"""

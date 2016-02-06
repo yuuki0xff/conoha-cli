@@ -86,3 +86,12 @@ class Token(API):
 			url = url.replace('{TENANT_ID}', self.getTenantId())
 		return url.rstrip('/')
 
+class CustomList(list):
+	def __getitem__(self, key):
+		if isinstance(key, int) or isinstance(key, slice):
+			return super().__getitem__(key)
+		else:
+			for item in self:
+				if self._getitem(key, item):
+					return item
+
