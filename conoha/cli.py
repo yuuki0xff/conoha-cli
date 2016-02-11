@@ -44,11 +44,6 @@ def prettyPrint(format_=None, header=True):
 				output.append(zip(headerRow, row))
 			else:
 				output.append(row)
-#             for headerCell, cell in zip(headerRow, row):
-#                 if header_:
-#                     yield [headerCell, cell]
-#                 else:
-#                     yield [cell]
 		rowsWidth = len(str(rows))
 		separateStr = '*'*(int((headerWidth + spaceWidth + valueColWidth - 2 - rowsWidth)/2))
 		for rowNo, row in enumerate(output):
