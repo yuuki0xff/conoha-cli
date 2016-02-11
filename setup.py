@@ -2,7 +2,7 @@
 from setuptools import setup
 
 setup(name='conoha-cli',
-      version='0.0.2',
+      version='0.0.4',
       description='conoha-cli is a command and Python3 library for ConoHa API.',
       url='https://github.com/yuuki0xff/conoha-cli',
       author='yuuki0xff',
