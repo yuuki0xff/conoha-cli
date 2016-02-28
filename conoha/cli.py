@@ -58,6 +58,8 @@ def prettyPrint(format_=None, header=True):
 		@functools.wraps(func)
 		def wrapper(cls, token, args):
 			output = func(cls, token, args)
+			if ('quiet' in args) and args.quiet:
+					return
 			if output:
 				# Select first non None value
 				fmt = next((i for i in [args.format, format_] if i is not None), None)
