@@ -6,6 +6,7 @@ from argparse import ArgumentParser, FileType
 import sys
 from conoha.compute import VMPlanList, VMImageList, VMList, KeyList
 from conoha.network import SecurityGroupList
+from conoha.block import BlockTypeList, VolumeList
 from tabulate import tabulate
 import functools
 
@@ -116,6 +117,10 @@ def getArgumentParser():
 	parser_network = subparser.add_parser('network')
 	subparser_network = parser_network.add_subparsers()
 	NetworkCommand.configureParser(subparser_network)
+
+	parser_block = subparser.add_parser('block')
+	subparser_block = parser_block.add_subparsers()
+	BlockCommand.configureParser(subparser_block)
 
 	return parser
 
@@ -402,6 +407,89 @@ class NetworkCommand():
 		sglist = SecurityGroupList(token)
 		sg = sglist[args.group or args.group_id]
 		sg.rules.delete(args.rule_id)
+
+class BlockCommand():
+	@classmethod
+	def configureParser(cls, subparser):
+		listTypes = subparser.add_parser('list-types')
+		listTypes.add_argument('--verbose', action='store_true')
+		listTypes.set_defaults(func=cls.listTypes)
+
+		listVolumes = subparser.add_parser('list-volumes')
+		listVolumes.add_argument('--verbose', action='store_true')
+		listVolumes.set_defaults(func=cls.listVolumes)
+
+		addVolume = subparser.add_parser('add-volume')
+		addVolume.add_argument('--quiet', action='store_true')
+		addVolume.add_argument('--size', type=int)
+		addVolume.add_argument('--name', type=str)
+		addVolume.add_argument('--description', type=str)
+		addVolume.add_argument('--source', type=str)
+		addVolume.add_argument('--snapshotId', type=str)
+		addVolume.add_argument('--image-ref', type=str)
+		addVolume.add_argument('--bootable', action='store_true')
+		addVolume.set_defaults(func=cls.addVolume)
+
+		deleteVolume = subparser.add_parser('delete-volume')
+		deleteVolume.add_argument('--name', type=str)
+		deleteVolume.add_argument('--id', type=str)
+		deleteVolume.set_defaults(func=cls.deleteVolume)
+
+	@classmethod
+	@prettyPrint()
+	def listTypes(cls, token, args):
+		typeList = BlockTypeList(token)
+		# Header
+		if args.verbose:
+			yield ['ID', 'Name', 'Description']
+		else:
+			yield ['ID', 'Name']
+		# Body
+		for type_ in typeList:
+			if args.verbose:
+				yield [type_.typeId, type_.name, type_.extra]
+			else:
+				yield [type_.typeId, type_.name]
+
+	@classmethod
+	@prettyPrint()
+	def listVolumes(cls, token, args):
+		volumeList = VolumeList(token)
+		# Header
+		if args.verbose:
+			yield ['ID', 'Name', 'Size', 'Bootable', 'Encrypted', 'Description', 'Metadata']
+		else:
+			yield ['ID', 'Name', 'Size', 'Bootable', 'Encrypted', 'Description']
+		# Body
+		for volume in volumeList:
+			if args.verbose:
+				yield [volume.volumeId, volume.name, volume.size, volume.bootable, volume.encrypted, volume.description, volume.metadata]
+			else:
+				yield [volume.volumeId, volume.name, volume.size, volume.bootable, volume.encrypted, volume.description]
+
+	@classmethod
+	@prettyPrint()
+	def addVolume(cls, token, args):
+		volumeList = VolumeList(token)
+		volId = volumeList.add(
+				args.size,
+				name=args.name,
+				description=args.description,
+				source=args.source,
+				snapshotId=args.snapshotId,
+				imageRef=args.image_ref,
+				bootable=args.bootable,
+				)
+		if not args.quiet:
+			yield ['ID']
+			yield [volId]
+
+	@classmethod
+	@prettyPrint()
+	def deleteVolume(cls, token, args):
+		volumeList = VolumeList(token)
+		vol = volumeList[args.id or args.name]
+		volumeList.delete(vol.volumeId)
 
 if __name__ == '__main__':
 	exit(main())
