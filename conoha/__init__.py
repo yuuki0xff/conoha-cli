@@ -1,3 +1,3 @@
 
-from . import api, config, compute, network
+from . import api, config, compute, network, block
 
