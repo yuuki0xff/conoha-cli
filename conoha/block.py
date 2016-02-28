@@ -38,10 +38,10 @@ class Volume(BlockStorageAPI):
 		self.description = data['description']
 		self.encrypted = data['encrypted']
 		self.metadata = data['metadata']
-		self.tenantId = data['os-vol-tenant-attr:tenant_id']
+		self.tenantId = data.get('os-vol-tenant-attr:tenant_id')
 		self.replication = {
-				'driverData': data['os-volume-replication:driver_data'],
-				'extendedStatus': data['os-volume-replication:extended_status'],
+				'driverData': data.get('os-volume-replication:driver_data'),
+				'extendedStatus': data.get('os-volume-replication:extended_status'),
 				}
 		self.replicationStatus = data['replication_status']
 		self.size = data['size']
