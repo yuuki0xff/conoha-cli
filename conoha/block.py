@@ -84,7 +84,9 @@ class VolumeList(BlockStorageAPI, CustomList):
 			'metadata': metadata,
 			}}
 		res = self._POST('volumes', data)
-		self.append(Volume(res['volume']))
+		vol = Volume(res['volume'])
+		self.append(vol)
+		return vol.volumeId
 
 	def delete(self, volumeId):
 		res = self._DELETE('volumes/'+volumeId, isDeserialize=False)
