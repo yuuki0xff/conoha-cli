@@ -7,6 +7,7 @@ import sys
 from conoha.compute import VMPlanList, VMImageList, VMList, KeyList
 from conoha.network import SecurityGroupList
 from conoha.block import BlockTypeList, VolumeList
+from conoha.image import ImageList, Quota
 from tabulate import tabulate
 import functools
 
@@ -121,6 +122,10 @@ def getArgumentParser():
 	parser_block = subparser.add_parser('block')
 	subparser_block = parser_block.add_subparsers()
 	BlockCommand.configureParser(subparser_block)
+
+	parser_image = subparser.add_parser('image')
+	subparser_image = parser_image.add_subparsers()
+	ImageCommand.configureParser(subparser_image)
 
 	return parser
 
@@ -490,6 +495,41 @@ class BlockCommand():
 		volumeList = VolumeList(token)
 		vol = volumeList[args.id or args.name]
 		volumeList.delete(vol.volumeId)
+
+class ImageCommand():
+	@classmethod
+	def configureParser(cls, subparser):
+		listImages = subparser.add_parser('list-images')
+		listImages.add_argument('--verbose', action='store_true')
+		listImages.set_defaults(func=cls.listImages)
+
+		showQuota = subparser.add_parser('show-quota')
+		showQuota.set_defaults(func=cls.showQuota)
+
+		setQuota = subparser.add_parser('set-quota')
+		setQuota.add_argument('--size', type=int)
+		setQuota.set_defaults(func=cls.setQuota)
+
+	@classmethod
+	@prettyPrint()
+	def listImages(cls, token, args):
+		images  = ImageList(token)
+		yield ['ID', 'Name', 'MinDisk', 'MinRAM', 'Status', 'CreatedAt']
+		for i in images:
+			yield [i.imageId, i.name, i.min_disk, i.min_ram, i.status, i.created_at]
+
+	@classmethod
+	@prettyPrint()
+	def showQuota(cls, token, args):
+		quota = Quota(token)
+		yield ['Region', 'Size']
+		yield [quota.region, quota.size]
+
+	@classmethod
+	@prettyPrint()
+	def setQuota(cls, token, args):
+		quota = Quota(token)
+		quota.set(args.size)
 
 if __name__ == '__main__':
 	exit(main())
