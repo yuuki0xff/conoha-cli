@@ -3,7 +3,7 @@ from setuptools import setup
 import textwrap
 
 setup(name='conoha-cli',
-      version='0.0.4',
+      version='0.0.5',
       description='conoha-cli is a command and Python3 library for ConoHa API.',
       long_description=open('README.rst', 'r', encoding='utf8').read(),
       keywards='conoha cli api library cloud',
