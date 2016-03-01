@@ -2,7 +2,7 @@
 from .api import API, CustomList
 from collections import namedtuple
 
-__all__ = ''.split()
+__all__ = 'Image ImageList Quota'.split()
 
 class ImageAPI(API):
 	def __init__(self, token, baseURIPrefix=None):

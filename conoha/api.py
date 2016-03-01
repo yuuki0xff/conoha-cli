@@ -3,7 +3,7 @@
 from urllib.request import Request, urlopen
 import json
 
-__all__ = 'API Tenant'.split()
+__all__ = 'API'.split()
 
 class DictWrapper(dict):
 	""" dictインスタンスへインスタンス変数を追加するために使用する """
