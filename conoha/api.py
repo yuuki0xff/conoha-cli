@@ -5,6 +5,13 @@ import json
 
 __all__ = 'API Tenant'.split()
 
+class DictWrapper(dict):
+	""" dictインスタンスへインスタンス変数を追加するために使用する """
+	pass
+class BytesWrapper(bytes):
+	""" bytesインスタンスへインスタンス変数を追加するために使用する """
+	pass
+
 class API:
 	def __init__(self, token=None, baseURIPrefix=None):
 		self.__baseURI = None
@@ -44,9 +51,14 @@ class API:
 		with urlopen(req) as res:
 			resBin = res.read()
 			if isDeserialize:
-				return json.loads(str(resBin, 'utf8'))
+				data = DictWrapper(json.loads(str(resBin, 'utf8')))
 			else:
-				return resBin
+				data = BytesWrappe(resBin)
+			# HTTPステータスコードとヘッダーを追加
+			data.code = res.code
+			data.msg = res.msg
+			data.headers = res.headers
+			return data
 
 	def _DELETE(self, *args, **nargs):
 		return self._GET(*args, method='DELETE', **nargs)
