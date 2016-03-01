@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+
+import conoha.cli
+
+if __name__ == '__main__':
+	exit(conoha.cli.main())
+
