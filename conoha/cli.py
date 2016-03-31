@@ -144,26 +144,26 @@ class ComputeCommand():
 			listParser.set_defaults(func=listCommands[cmd])
 
 		addKeyParser = subparser.add_parser('add-key')
-		addKeyParser.add_argument('--quiet', action='store_true')
-		addKeyParser.add_argument('--name', type=str)
-		addKeyParser.add_argument('--file', type=FileType('r'))
-		addKeyParser.add_argument('--key', type=str)
+		addKeyParser.add_argument('-q', '--quiet', action='store_true')
+		addKeyParser.add_argument('-n', '--name', type=str, required=True)
+		addKeyParser.add_argument('-f', '--file', type=FileType('r'))
+		addKeyParser.add_argument('-k', '--key', type=str)
 		addKeyParser.set_defaults(func=cls.add_key)
 
 		deleteKeyParser = subparser.add_parser('delete-key')
-		deleteKeyParser.add_argument('--name', type=str)
+		deleteKeyParser.add_argument('-n', '--name', type=str)
 		deleteKeyParser.set_defaults(func=cls.delete_key)
 
 		addVmParser = subparser.add_parser('add-vm')
-		addVmParser.add_argument('--quiet', action='store_true')
-		addVmParser.add_argument('--name', type=str)        # for backward compatibility
-		addVmParser.add_argument('--image', type=str)
-		addVmParser.add_argument('--imageid', type=str)     # for backward compatibility
-		addVmParser.add_argument('--plan', type=str)
-		addVmParser.add_argument('--planid', type=str)      # for backward compatibility
-		addVmParser.add_argument('--passwd', type=str)
-		addVmParser.add_argument('--key', type=str)
-		addVmParser.add_argument('--group-names', type=str)
+		addVmParser.add_argument('-q', '--quiet', action='store_true')
+		addVmParser.add_argument('-n', '--name', type=str)        # for backward compatibility
+		addVmParser.add_argument('-i', '--image', type=str)
+		addVmParser.add_argument('-I', '--imageid', type=str)     # for backward compatibility
+		addVmParser.add_argument('-p', '--plan', type=str)
+		addVmParser.add_argument('-P', '--planid', type=str)      # for backward compatibility
+		addVmParser.add_argument(      '--passwd', type=str)
+		addVmParser.add_argument('-k', '--key', type=str)
+		addVmParser.add_argument('-g', '--group-names', type=str)
 		addVmParser.set_defaults(func=cls.add_vm)
 
 		vmCommands = {
@@ -175,12 +175,12 @@ class ComputeCommand():
 				}
 		for cmd in vmCommands:
 			vmParser = subparser.add_parser(cmd)
-			vmParser.add_argument('--name', type=str)
-			vmParser.add_argument('--id', type=str)
+			vmParser.add_argument('-n', '--name', type=str)
+			vmParser.add_argument('-i', '--id', type=str)
 			if cmd == 'stop-vm':
-				vmParser.add_argument('--force', action='store_true')
+				vmParser.add_argument('-f', '--force', action='store_true')
 			elif cmd == 'modify-vm':
-				vmParser.add_argument('--planid', type=str)
+				vmParser.add_argument('-P', '--planid', type=str)
 			vmParser.set_defaults(func=vmCommands[cmd])
 
 	@classmethod
@@ -312,40 +312,40 @@ class NetworkCommand():
 	@classmethod
 	def configureParser(cls, subparser):
 		listSG = subparser.add_parser('list-security-groups')
-		listSG.add_argument('--verbose', action='store_true')
+		listSG.add_argument('-v', '--verbose', action='store_true')
 		listSG.set_defaults(func=cls.listSecurityGroups)
 
 		addSG = subparser.add_parser('add-security-group')
-		addSG.add_argument('--name', type=str)
-		addSG.add_argument('--description', type=str)
+		addSG.add_argument('-n', '--name', type=str)
+		addSG.add_argument('-d', '--description', type=str)
 		addSG.set_defaults(func=cls.addSecurityGroup)
 
 		delSG = subparser.add_parser('delete-security-group')
-		delSG.add_argument('--name', type=str)
-		delSG.add_argument('--id', type=str)
+		delSG.add_argument('-n', '--name', type=str)
+		delSG.add_argument('-i', '--id', type=str)
 		delSG.set_defaults(func=cls.deleteSecurityGroup)
 
 		listRules = subparser.add_parser('list-rules')
-		listRules.add_argument('--verbose', action='store_true')
-		listRules.add_argument('--group', type=str)
-		listRules.add_argument('--id', type=str)        # for backward compatibility
-		listRules.add_argument('--name', type=str)      # for backward compatibility
+		listRules.add_argument('-v', '--verbose', action='store_true')
+		listRules.add_argument('-g', '--group', type=str)
+		listRules.add_argument('-i', '--id', type=str)        # for backward compatibility
+		listRules.add_argument('-n', '--name', type=str)      # for backward compatibility
 		listRules.set_defaults(func=cls.listRules)
 
 		addRule = subparser.add_parser('add-rule')
-		addRule.add_argument('--group', type=str)
-		addRule.add_argument('--id', type=str)          # for backward compatibility
-		addRule.add_argument('--direction', type=str)
-		addRule.add_argument('--ethertype', type=str)
-		addRule.add_argument('--port', type=str)
-		addRule.add_argument('--protocol', type=str)
-		addRule.add_argument('--remoteIPPrefix', type=str)
+		addRule.add_argument('-g', '--group', type=str)
+		addRule.add_argument('-i', '--id', type=str)          # for backward compatibility
+		addRule.add_argument('-d', '--direction', type=str)
+		addRule.add_argument('-e', '--ethertype', type=str)
+		addRule.add_argument('-p', '--port', type=str)
+		addRule.add_argument('-P', '--protocol', type=str)
+		addRule.add_argument('-r', '--remoteIPPrefix', type=str)
 		addRule.set_defaults(func=cls.addRule)
 
 		delRule = subparser.add_parser('delete-rule')
-		delRule.add_argument('--group', type=str)
-		delRule.add_argument('--group-id', type=str)    # for backward compatibility
-		delRule.add_argument('--rule-id', type=str)
+		delRule.add_argument('-g', '--group', type=str)
+		delRule.add_argument('-G', '--group-id', type=str)    # for backward compatibility
+		delRule.add_argument('-r', '--rule-id', type=str)
 		delRule.set_defaults(func=cls.deleteRule)
 
 	@classmethod
@@ -417,27 +417,27 @@ class BlockCommand():
 	@classmethod
 	def configureParser(cls, subparser):
 		listTypes = subparser.add_parser('list-types')
-		listTypes.add_argument('--verbose', action='store_true')
+		listTypes.add_argument('-v', '--verbose', action='store_true')
 		listTypes.set_defaults(func=cls.listTypes)
 
 		listVolumes = subparser.add_parser('list-volumes')
-		listVolumes.add_argument('--verbose', action='store_true')
+		listVolumes.add_argument('-v', '--verbose', action='store_true')
 		listVolumes.set_defaults(func=cls.listVolumes)
 
 		addVolume = subparser.add_parser('add-volume')
-		addVolume.add_argument('--quiet', action='store_true')
-		addVolume.add_argument('--size', type=int)
-		addVolume.add_argument('--name', type=str)
-		addVolume.add_argument('--description', type=str)
-		addVolume.add_argument('--source', type=str)
-		addVolume.add_argument('--snapshotId', type=str)
-		addVolume.add_argument('--image-ref', type=str)
-		addVolume.add_argument('--bootable', action='store_true')
+		addVolume.add_argument('-q', '--quiet', action='store_true')
+		addVolume.add_argument('-s', '--size', type=int)
+		addVolume.add_argument('-n', '--name', type=str)
+		addVolume.add_argument('-d', '--description', type=str)
+		addVolume.add_argument('-S', '--source', type=str)
+		addVolume.add_argument(      '--snapshotId', type=str)
+		addVolume.add_argument('-i', '--image-ref', type=str)
+		addVolume.add_argument('-b', '--bootable', action='store_true')
 		addVolume.set_defaults(func=cls.addVolume)
 
 		deleteVolume = subparser.add_parser('delete-volume')
-		deleteVolume.add_argument('--name', type=str)
-		deleteVolume.add_argument('--id', type=str)
+		deleteVolume.add_argument('-n', '--name', type=str)
+		deleteVolume.add_argument('-i', '--id', type=str)
 		deleteVolume.set_defaults(func=cls.deleteVolume)
 
 	@classmethod
@@ -500,14 +500,14 @@ class ImageCommand():
 	@classmethod
 	def configureParser(cls, subparser):
 		listImages = subparser.add_parser('list-images')
-		listImages.add_argument('--verbose', action='store_true')
+		listImages.add_argument('-v', '--verbose', action='store_true')
 		listImages.set_defaults(func=cls.listImages)
 
 		showQuota = subparser.add_parser('show-quota')
 		showQuota.set_defaults(func=cls.showQuota)
 
 		setQuota = subparser.add_parser('set-quota')
-		setQuota.add_argument('--size', type=int)
+		setQuota.add_argument('-s', '--size', type=int)
 		setQuota.set_defaults(func=cls.setQuota)
 
 	@classmethod
