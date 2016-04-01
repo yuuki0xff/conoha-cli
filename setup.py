@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 from setuptools import setup
 import textwrap
+import conoha
 
 setup(name='conoha-cli',
-      version='0.0.5',
+      version=conoha.__version__,
       description='conoha-cli is a command and Python3 library for ConoHa API.',
       long_description=open('README.rst', 'r', encoding='utf8').read(),
       keywords='conoha cli api library cloud',
