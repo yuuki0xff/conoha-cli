@@ -2,6 +2,21 @@ conoha-cli
 ==========
 conoha-cli is a command and Python3 library for [ConoHa](https://www.conoha.jp/) API.
 
+Support Status
+-------
+Service Name             | Status
+-------------------------|---------------
+Identity Service         | Full Support
+Account Service          | Not Support
+Compute Service          | Some Support
+Block Storage Service    | Some Support
+Image Service            | Some Support
+Network Service          | Some Support
+Object Storage Service   | Not Support
+Database Hosting Service | Not Support
+DNS Service              | Not Support
+Mail Hosting Service     | Not Support
+
 Installation
 ------------
 from PIP : ``` pip install conoha-cli ```  
