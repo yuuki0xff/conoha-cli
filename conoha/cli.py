@@ -5,6 +5,7 @@ from conoha.config import Config
 from argparse import FileType
 import argparse
 import sys
+import conoha
 from conoha.compute import VMPlanList, VMImageList, VMList, KeyList
 from conoha.network import SecurityGroupList
 from conoha.block import BlockTypeList, VolumeList
@@ -96,12 +97,21 @@ def main():
 	parser = getArgumentParser()
 	try:
 		parsed_args = parser.parse_args()
+
+		if parsed_args.version:
+			print('conoha-cli {}'.format(conoha.__version__))
+			return 0
+
 		# サブコマンドだけを指定した場合は失敗
 		assert('func' in parsed_args)
 	except AssertionError:
 		# 失敗した場合は、そのサブコマンドに対応するhelpを表示
-		parser.parse_args(sys.argv[1:]+['-h'])
-		return
+		try:
+			parser.parse_args(sys.argv[1:]+['-h'])
+		except SystemExit:
+			return 1
+		# ここが実行されてはいけない
+		return 2
 
 	conf = Config()
 	token = Token(conf)
@@ -146,6 +156,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
 def getArgumentParser():
 	parser = ArgumentParser()
+	parser.add_argument('-v', '--version', action='store_true', help='Display conoha-cli version')
 	parser.add_argument('--format', type=str, choices=formatters,
 			help='FORMAT is ' + ' or '.join("'{}'".format(i) for i in formatters),
 			metavar='FORMAT')
