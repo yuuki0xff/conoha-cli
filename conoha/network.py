@@ -9,6 +9,13 @@ class NetworkAPI(API):
 		self._serviceType = 'network'
 
 class SecurityGroupList(NetworkAPI, CustomList):
+	"""セキュリティグループの一覧
+
+	使い方:
+	    sgroups = SecurityGroupList(token)
+	    sgroup = sgroups['groupName']
+	    sgroup = sgroups['groupId']
+	"""
 	def __init__(self, token):
 		super().__init__(token)
 		CustomList.__init__(self)
@@ -18,6 +25,7 @@ class SecurityGroupList(NetworkAPI, CustomList):
 		return key in [item.id_, item.name]
 
 	def update(self):
+		"""セキュリティグループの一覧を更新する"""
 		res = self._GET('security-groups')
 		self.clear()
 		self.extend(SecurityGroup(self.token, i) for i in res['security_groups'])
@@ -39,6 +47,14 @@ class SecurityGroupList(NetworkAPI, CustomList):
 		self._DELETE('security-groups/{}'.format(securityGroupID), isDeserialize=False)
 
 class SecurityGroup(NetworkAPI):
+	"""セキュリティグループ
+
+	インスタンス変数:
+	    id_         : str                   :
+	    name        : str                   :
+	    description : str                   :
+	    rules       : SecurityGroupRuleList : このグループに属しているルールの一覧
+	"""
 	def __init__(self, token, info):
 		super().__init__(token)
 		self.id_ = info['id']
@@ -59,6 +75,7 @@ class SecurityGroup(NetworkAPI):
 		self._PUT('security-groups/{}'.format(self.id_), data)
 
 class SecurityGroupRuleList(NetworkAPI, CustomList):
+	"""フィルタリングルールの一覧"""
 	def __init__(self, token, id_, info):
 		super().__init__(token)
 		CustomList.__init__(self)
@@ -94,6 +111,17 @@ class SecurityGroupRuleList(NetworkAPI, CustomList):
 		self._DELETE('security-group-rules/{}'.format(securityGroupRuleID), isDeserialize=False)
 
 class SecurityGroupRule(NetworkAPI):
+	"""フィルタリングルール
+
+	インスタンス変数:
+	    id_:str:
+	    direction      : str         : "ingress" or "egress"
+	    ethertype      : str         : "IPv4" or "IPv6"
+	    rangeMin       : int or None : 規制するポート番号の下限
+	    rangeMax       : int or None : 対象のポート番号の上限
+	    protocol       : str or None : "tcp" or "udp" or "icmp" or "null"
+	    remoteIPPrefix : str         :
+	"""
 	def __init__(self, info):
 		self.id_ = info['id']
 		self.direction = info['direction']

@@ -6,6 +6,25 @@ from configparser import SafeConfigParser
 __all__ = 'Config'.split()
 
 class Config(SafeConfigParser):
+	"""conohaの構成
+
+	引数:
+	    fromFile: 構成情報を記録したファイルのパス
+	    fromDict: 構成情報のdictオブジェクト
+
+	    fromFile と fromDict は同時に指定できない。
+	    fromFile, fromDictどちらも指定しなければ、一番最初に見つかったファイルから構成情報を読み込む
+	        ~/.config/conoha/config
+	        ~/.conoha/config
+
+	構成情報の優先順位は以下の通り
+	    1. 引数により指定された値
+	    2. 環境変数
+	    3. デフォルト値
+
+	configファイルはINI file formatでなければならない。
+	環境変数名は"CONOHA_{section}_{key}"で、全て大文字である。
+	"""
 	endpoint = {
 			'japan': {
 				'account': 'https://account.tyo1.conoha.io/v1/{TENANT_ID}',
@@ -84,6 +103,7 @@ class Config(SafeConfigParser):
 		self.read_dict(self._defaultValue)
 
 	def _readEnv(self):
+		"""環境変数から設定を読み込む"""
 		for key in os.environ:
 			if not key.startswith('CONOHA_') or len(key.split('_')) != 3:
 				continue

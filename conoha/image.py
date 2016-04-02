@@ -11,6 +11,7 @@ class ImageAPI(API):
 
 
 class Image(ImageAPI):
+	"""保存済みのディスクイメージ"""
 	def __init__(self, data):
 		self.status = data['status']
 		self.name = data['name']
@@ -33,6 +34,7 @@ class Image(ImageAPI):
 		self.schema = data['schema']
 
 class ImageList(ImageAPI, CustomList):
+	"""保存済みのディスクイメージの一覧"""
 	def __init__(self, token):
 		super().__init__(token)
 		CustomList.__init__(self)
@@ -44,6 +46,9 @@ class ImageList(ImageAPI, CustomList):
 		return key in [item.imageId, item.name]
 
 class Quota(ImageAPI):
+	"""保存可能なディスクイメージの合計サイズを制限する
+	500GBで指定可能
+	"""
 	QuotaTuple = namedtuple('QuotaTuple', ['region', 'size'])
 
 	def __init__(self, token):
@@ -58,6 +63,10 @@ class Quota(ImageAPI):
 			self.size = int(value[:-2])
 
 	def set(self, size):
+		"""クォータを設定する
+		sizeの単位はGB。
+		50, 550, 1050, ...のように500GB単位で設定可能
+		"""
 		assert(type(size) is int)
 		assert(size >= 50 and (size-50)%500 == 0) # size: 50, 550, 1050, ...
 

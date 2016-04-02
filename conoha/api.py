@@ -13,6 +13,7 @@ class BytesWrapper(bytes):
 	pass
 
 class API:
+	"""全てのConoHa APIを呼び出すクラスのスーパークラス"""
 	def __init__(self, token=None, baseURIPrefix=None):
 		self.__baseURI = None
 		self.token = token
@@ -30,6 +31,17 @@ class API:
 		return headers
 
 	def _GET(self, path, data=None, isDeserialize=True, headers=None, method='GET'):
+		"""APIを呼び出す
+
+		dataにNone以外を指定した場合は、jsonに変換してアップロードする
+		headersにはdictを指定した場合は、リクエストに指定したヘッダーを追加する
+
+		レスポンスは、DictWrapperオブジェクトかBytesWrapperオブジェクト
+		レスポンスには、下記の属性を含む
+		    code:int      http status code
+			msg:str       http status message
+			headers:dict  レスポンスヘッダー
+		"""
 		# set self.__baseURI
 		if not self.__baseURI:
 			if self.token:
@@ -61,12 +73,15 @@ class API:
 			return data
 
 	def _DELETE(self, *args, **nargs):
+		"""see help(self._GET)"""
 		return self._GET(*args, method='DELETE', **nargs)
 
 	def _POST(self, path, data, *args, **nargs):
+		"""see help(self._GET)"""
 		return self._GET(path, data, *args, method='POST', **nargs)
 
 	def _PUT(self, path, data, *args, **nargs):
+		"""see help(self._GET)"""
 		return self._GET(path, data, *args, method='PUT', **nargs)
 
 class Token(API):
@@ -99,6 +114,12 @@ class Token(API):
 		return url.rstrip('/')
 
 class CustomList(list):
+	"""インデックス指定の拡張を支援する
+	インデックスが int または slice で指定された場合は、通常のリスト同様の動作をする
+	それ以外のオブジェクトを指定した場合は、_getitemメソッドが最初にTrueを返したitemを返す
+
+	サブクラスは_getitem(key, item)メソッドを実装しなければならない
+	"""
 	def __getitem__(self, key):
 		if isinstance(key, int) or isinstance(key, slice):
 			return super().__getitem__(key)

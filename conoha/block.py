@@ -52,6 +52,7 @@ class Volume(BlockStorageAPI):
 		self.volumeType = data['volume_type']
 
 class VolumeList(BlockStorageAPI, CustomList):
+	"""ボリュームの一覧"""
 	def __init__(self, token):
 		super().__init__(token)
 		CustomList.__init__(self)
@@ -63,6 +64,11 @@ class VolumeList(BlockStorageAPI, CustomList):
 		return key in [item.volumeId, item.name]
 
 	def add(self, size, name=None, description=None, source=None, snapshotId=None, imageRef=None, bootable=None, metadata={}):
+		"""ボリュームを追加
+
+		sizeには 200 または 500 を指定する
+		nameは255文字以下。使用可能な文字は[a-zA-Z\\-_]
+		"""
 		assert type(size) is int, TypeError('size must be int type')
 		assert size in [200, 500], ValueError('size was 200 or 500')
 		if bootable is not None:

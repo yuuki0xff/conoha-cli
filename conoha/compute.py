@@ -9,6 +9,15 @@ class ComputeAPI(API):
 		self._serviceType = 'compute'
 
 class VMPlan(ComputeAPI):
+	"""Compute Serviceのプラン
+
+	インスタンス変数
+		planId : str :
+		name   : str :
+		disk   : int : rootのディスクサイズ
+		ram    : int : RAMのサイズ(MiB)
+		vcpus  : int : 仮想マシンのCPU数
+	"""
 	def __init__(self, data):
 		self.planId = data['id']
 		self.name = data['name']
@@ -17,6 +26,14 @@ class VMPlan(ComputeAPI):
 		self.vcpus = data['vcpus']
 
 class VMPlanList(ComputeAPI, CustomList):
+	"""Compute Serviceのプランの一覧を管理する
+	データの更新は、オプジェクトが作成された時の1回のみ
+
+	使い方:
+	    plans = VMPlanList(token)
+	    plan = plans['planName']
+	    plan = plans['planId']
+	"""
 	def __init__(self, token):
 		super().__init__(token)
 		CustomList.__init__(self)
@@ -28,6 +45,18 @@ class VMPlanList(ComputeAPI, CustomList):
 		return key in [item.planId, item.name]
 
 class VMImage(ComputeAPI):
+	"""Compute Serviceのディスクイメージ
+
+	インスタンス変数
+		imageId  : str :
+		name     : str :
+		minDisk  : int : このイメージを使用するために必要な最小のディスクサイズ
+		minRam   : int : このイメージを使用するために必要な最小のRAMサイズ
+		progress : int :
+		status   : str :
+		created  : str :
+		updated  : str :
+	"""
 	def __init__(self, data):
 		self.imageId = data['id']
 		self.name = data['name']
@@ -39,6 +68,13 @@ class VMImage(ComputeAPI):
 		self.updated = data['updated']
 
 class VMImageList(ComputeAPI, CustomList):
+	"""保存済みのディスクイメージの一覧
+
+	使い方:
+		images = VMImageList(token)
+		image = images['imageName']
+		image = images['imageId']
+	"""
 	def __init__(self, token):
 		super().__init__(token)
 		CustomList.__init__(self)
@@ -50,6 +86,13 @@ class VMImageList(ComputeAPI, CustomList):
 		return key in [item.imageId, item.name]
 
 class VMList(ComputeAPI, CustomList):
+	"""VMの一覧
+
+	使い方:
+	    vms = VMList(token)
+	    vm = vms['vmName']
+	    vm = vms['vmid']
+	"""
 	def __init__(self, token):
 		super().__init__(token)
 		CustomList.__init__(self)
@@ -59,6 +102,7 @@ class VMList(ComputeAPI, CustomList):
 		return key in [item.vmid, item.name]
 
 	def update(self):
+		"""VMの一覧を更新する"""
 		res = self._GET('servers/detail')
 		self.clear()
 		self.extend(VM(self.token, i) for i in res['servers'])
@@ -94,6 +138,22 @@ class VMList(ComputeAPI, CustomList):
 		self._servers = None
 
 class VM(ComputeAPI):
+	"""仮想マシン
+	仮想マシンの状態は、オブジェクトが作成された時点の情報である
+
+	インスタンス変数
+		vmid              : str  :
+		flavorId          : str  : planのID
+		hostId            : str  :
+		imageId           : str  :
+		tenantId          : str  :
+		name              : str  :
+		status            : str  :
+		created           : str  :
+		updated           : str  :
+		addressList       : dict :
+		securityGroupList : dict :
+	"""
 	def __init__(self, token, info):
 		self.vmid = info['id']
 		super().__init__(token, baseURIPrefix='servers/' + self.vmid)
@@ -134,6 +194,7 @@ class VM(ComputeAPI):
 		return res['server']['status']
 
 class KeyList(ComputeAPI, CustomList):
+	"""SSHの鍵の一覧"""
 	def __init__(self, token):
 		super().__init__(token)
 		CustomList.__init__(self)
@@ -143,12 +204,14 @@ class KeyList(ComputeAPI, CustomList):
 		return key in [item.name, item.fingerprint]
 
 	def update(self):
+		"""鍵の一覧を更新する"""
 		res = self._GET('os-keypairs')
 		self.clear()
 		self.extend(Key(keypair['keypair']) for keypair in res['keypairs'])
 
 	def add(self, name, publicKey=None, publicKeyFile=None):
-		"""
+		"""鍵を追加する
+
 		publicKey が文字列なら、そのキーを使用
 		publicKeyFile が文字列なら、そのキーを使用
 		publicKey or publicKeyFile がfile likeオブジェクトなら、そのキーを使用
@@ -174,10 +237,21 @@ class KeyList(ComputeAPI, CustomList):
 		return Key(res['keypair'])
 
 	def delete(self, keyName):
+		"""鍵を削除する
+		実行後は update() を実行してください
+		"""
 		self._DELETE('os-keypairs/'+keyName, isDeserialize=False)
 		self._keys = None
 
 class Key(ComputeAPI):
+	"""SSHの鍵
+
+	インスタンス変数
+		name        : str :
+	    fingerprint : str :
+		publicKey   : str :
+		privateKey  : str : 鍵を作成した時以外はNone
+	"""
 	def __init__(self, info):
 		self.name = info['name']
 		self.fingerprint = info['fingerprint']
