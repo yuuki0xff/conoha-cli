@@ -365,7 +365,7 @@ class NetworkCommand():
 	@classmethod
 	def configureParser(cls, subparser):
 		listSG = subparser.add_parser('list-security-groups')
-		listSG.add_argument('-v', '--verbose', action='store_true')
+		listSG.add_argument('-v', '--verbose', action='store_true', help='be verbose')
 		listSG.set_defaults(func=cls.listSecurityGroups)
 
 		addSG = subparser.add_parser('add-security-group', help='add security group')
@@ -380,25 +380,25 @@ class NetworkCommand():
 
 		listRules = subparser.add_parser('list-rules', help='display the packet filtering rules in security group')
 		listRules.add_argument('-v', '--verbose', action='store_true')
-		listRules.add_argument('-g', '--group', type=str)
-		listRules.add_argument('-i', '--id',    type=str)        # for backward compatibility
-		listRules.add_argument('-n', '--name',  type=str)        # for backward compatibility
+		listRules.add_argument('-g', '--group', type=str, help='security group name or ID')
+		listRules.add_argument('-i', '--id',    type=str, help='security group ID')        # for backward compatibility
+		listRules.add_argument('-n', '--name',  type=str, help='security group name')      # for backward compatibility
 		listRules.set_defaults(func=cls.listRules)
 
 		addRule = subparser.add_parser('add-rule', help='add packet filtering rule')
-		addRule.add_argument('-g', '--group',          type=str)
-		addRule.add_argument('-i', '--id',             type=str) # for backward compatibility
-		addRule.add_argument('-d', '--direction',      type=str)
-		addRule.add_argument('-e', '--ethertype',      type=str)
-		addRule.add_argument('-p', '--port',           type=str)
-		addRule.add_argument('-P', '--protocol',       type=str)
-		addRule.add_argument('-r', '--remoteIPPrefix', type=str)
+		addRule.add_argument('-g', '--group',          type=str, help='security group name or ID')
+		addRule.add_argument('-i', '--id',             type=str, help='security group ID') # for backward compatibility
+		addRule.add_argument('-d', '--direction',      type=str, help='"ingress" or "egress"')
+		addRule.add_argument('-e', '--ethertype',      type=str, help='ipv4 or ipv6')
+		addRule.add_argument('-p', '--port',           type=str, help='port number')
+		addRule.add_argument('-P', '--protocol',       type=str, help='tcp or tdp or icmp')
+		addRule.add_argument('-r', '--remoteIPPrefix', type=str, metavar='REMOTE_IP')
 		addRule.set_defaults(func=cls.addRule)
 
 		delRule = subparser.add_parser('delete-rule', help='delete packet filtering rule')
-		delRule.add_argument('-g', '--group',     type=str)
-		delRule.add_argument('-G', '--group-id',  type=str) # for backward compatibility
-		delRule.add_argument('-r', '--rule-id',   type=str)
+		delRule.add_argument('-g', '--group',     type=str, help='security group name or ID')
+		delRule.add_argument('-G', '--group-id',  type=str, help='security group ID') # for backward compatibility
+		delRule.add_argument('-r', '--rule-id',   type=str, help='packet filtering rule ID')
 		delRule.set_defaults(func=cls.deleteRule)
 
 	@classmethod
@@ -470,17 +470,17 @@ class BlockCommand():
 	@classmethod
 	def configureParser(cls, subparser):
 		listTypes = subparser.add_parser('list-types', help='display volume types')
-		listTypes.add_argument('-v', '--verbose', action='store_true')
+		listTypes.add_argument('-v', '--verbose', action='store_true', help='be verbose')
 		listTypes.set_defaults(func=cls.listTypes)
 
 		listVolumes = subparser.add_parser('list-volumes', help='list volumes')
-		listVolumes.add_argument('-v', '--verbose', action='store_true')
+		listVolumes.add_argument('-v', '--verbose', action='store_true', help='be verbose')
 		listVolumes.set_defaults(func=cls.listVolumes)
 
 		addVolume = subparser.add_parser('add-volume', help='add a volume')
-		addVolume.add_argument('-q', '--quiet', action='store_true')
-		addVolume.add_argument('-s', '--size',        type=int)
-		addVolume.add_argument('-n', '--name',        type=str)
+		addVolume.add_argument('-q', '--quiet', action='store_true', help='trun off output')
+		addVolume.add_argument('-s', '--size',        type=int,      help='200 or 500 GiB')
+		addVolume.add_argument('-n', '--name',        type=str,      help='volume name')
 		addVolume.add_argument('-d', '--description', type=str)
 		addVolume.add_argument('-S', '--source',      type=str)
 		addVolume.add_argument(      '--snapshotId',  type=str)
@@ -489,8 +489,8 @@ class BlockCommand():
 		addVolume.set_defaults(func=cls.addVolume)
 
 		deleteVolume = subparser.add_parser('delete-volume', help='delete a volume')
-		deleteVolume.add_argument('-n', '--name', type=str)
-		deleteVolume.add_argument('-i', '--id',   type=str)
+		deleteVolume.add_argument('-n', '--name', type=str,  help='volume name')
+		deleteVolume.add_argument('-i', '--id',   type=str,  help='volume ID')
 		deleteVolume.set_defaults(func=cls.deleteVolume)
 
 	@classmethod
@@ -553,14 +553,14 @@ class ImageCommand():
 	@classmethod
 	def configureParser(cls, subparser):
 		listImages = subparser.add_parser('list-images', help='list saved images in current region')
-		listImages.add_argument('-v', '--verbose', action='store_true')
+		listImages.add_argument('-v', '--verbose', action='store_true', help='be verbose')
 		listImages.set_defaults(func=cls.listImages)
 
 		showQuota = subparser.add_parser('show-quota', help='show quota')
 		showQuota.set_defaults(func=cls.showQuota)
 
 		setQuota = subparser.add_parser('set-quota', help='set quota')
-		setQuota.add_argument('-s', '--size', type=int)
+		setQuota.add_argument('-s', '--size', type=int, help='(50 + 500*n) GB')
 		setQuota.set_defaults(func=cls.setQuota)
 
 	@classmethod
