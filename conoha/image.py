@@ -13,7 +13,7 @@ class ImageAPI(API):
 class Image(ImageAPI):
 	"""保存済みのディスクイメージ"""
 	def __init__(self, data):
-		self.status = data['status']
+		self.status = data.get('status')
 		self.name = data['name']
 		self.tags = data['tags']
 		self.container_format = data['container_format']
@@ -30,7 +30,7 @@ class Image(ImageAPI):
 		self.checksum = data['checksum']
 		self.owner = data['owner']
 		self.direct_url = data['direct_url']
-		self.hw_qemu_guest_agent = data['hw_qemu_guest_agent']
+		self.hw_qemu_guest_agent = data.get('hw_qemu_guest_agent')
 		self.schema = data['schema']
 
 class ImageList(ImageAPI, CustomList):

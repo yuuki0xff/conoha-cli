@@ -1,5 +1,6 @@
 
 from .api import API, CustomList
+from .image import Image
 
 __all__ = 'BlockType BlockTypeList Volume VolumeList'.split()
 
@@ -26,7 +27,8 @@ class BlockTypeList(BlockStorageAPI, CustomList):
 		return key in [item.typeId, item.name]
 
 class Volume(BlockStorageAPI):
-	def __init__(self, data):
+	def __init__(self, data, token):
+		super().__init__(token)
 		self.volumeId = data['id']
 		self.name = data['name']
 		self.links = data['links']
@@ -51,6 +53,20 @@ class Volume(BlockStorageAPI):
 		self.userId = data['user_id']
 		self.volumeType = data['volume_type']
 
+	def save(self, imageName, diskFormat='qcow2', containerFormat='ovf'):
+		"""ボリュームのイメージを保存"""
+		# TODO: image.pyの実装が完了したら、実装する
+		path = 'volumes/{}/action'.format(self.volumeId)
+		data = {
+				"os-volume_upload_image": {
+					"image_name": imageName,
+					"disk_format": diskFormat,
+					"container_format": containerFormat,
+					}
+				}
+		res = self._POST(path, data)
+		return Image(res)
+
 class VolumeList(BlockStorageAPI, CustomList):
 	"""ボリュームの一覧"""
 	def __init__(self, token):
@@ -58,7 +74,7 @@ class VolumeList(BlockStorageAPI, CustomList):
 		CustomList.__init__(self)
 		path = 'volumes/detail'
 		res = self._GET(path)
-		self.extend(Volume(i) for i in res['volumes'])
+		self.extend(Volume(i, token) for i in res['volumes'])
 
 	def _getitem(self, key, item):
 		return key in [item.volumeId, item.name]
@@ -90,12 +106,10 @@ class VolumeList(BlockStorageAPI, CustomList):
 			'metadata': metadata,
 			}}
 		res = self._POST('volumes', data)
-		vol = Volume(res['volume'])
+		vol = Volume(res['volume'], self.token)
 		self.append(vol)
 		return vol.volumeId
 
 	def delete(self, volumeId):
 		res = self._DELETE('volumes/'+volumeId, isDeserialize=False)
-
-	def save(self, volumeId): pass # TODO: image.pyの実装が完了したら、実装する
 
