@@ -53,7 +53,7 @@ class API:
 			if isDeserialize:
 				data = DictWrapper(json.loads(str(resBin, 'utf8')))
 			else:
-				data = BytesWrappe(resBin)
+				data = BytesWrapper(resBin)
 			# HTTPステータスコードとヘッダーを追加
 			data.code = res.code
 			data.msg = res.msg
