@@ -45,6 +45,10 @@ class ImageList(ImageAPI, CustomList):
 	def _getitem(self, key, item):
 		return key in [item.imageId, item.name]
 
+	def delete(self, imageId):
+		path= 'images/{}'.format(imageId)
+		self._DELETE(path, isDeserialize=False)
+
 class Quota(ImageAPI):
 	"""保存可能なディスクイメージの合計サイズを制限する
 	500GBで指定可能
