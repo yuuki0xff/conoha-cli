@@ -17,6 +17,8 @@ Database Hosting Service | Not Support
 DNS Service              | Not Support
 Mail Hosting Service     | Not Support
 
+See conoha-apis.md for deltails.
+
 Installation
 ------------
 from PIP : ``` pip install conoha-cli ```  
