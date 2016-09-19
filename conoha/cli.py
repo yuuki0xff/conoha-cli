@@ -192,7 +192,7 @@ class ComputeCommand():
 				'list-vms': cls.list_vms,
 				}
 		for cmd in listCommands:
-			listParser = subparser.add_parser(cmd)
+			listParser = subparser.add_parser(cmd, help='')
 			listParser.add_argument('--verbose', action='store_true')
 			listParser.set_defaults(func=listCommands[cmd])
 
@@ -364,7 +364,7 @@ class ComputeCommand():
 class NetworkCommand():
 	@classmethod
 	def configureParser(cls, subparser):
-		listSG = subparser.add_parser('list-security-groups')
+		listSG = subparser.add_parser('list-security-groups', help='')
 		listSG.add_argument('-v', '--verbose', action='store_true', help='be verbose')
 		listSG.set_defaults(func=cls.listSecurityGroups)
 
