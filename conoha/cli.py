@@ -318,8 +318,8 @@ class ComputeCommand():
 				name=args.name,
 				securityGroupNames=groupNames)
 		if not args.quiet:
-			yield 'VMID'
-			yield vmid
+			yield ['VMID']
+			yield [vmid]
 
 	@classmethod
 	@prettyPrint()
