@@ -311,8 +311,8 @@ class ComputeCommand():
 
 		vmlist = VMList(token)
 		vmid = vmlist.add(
-				args.imageid or vmlist[args.image].imageid,
-				args.planid or vmlist[args.plan].planid,
+				args.imageid or VMImageList(token)[args.image].imageId,
+				args.planid or VMPlanList(token)[args.plan].planId,
 				adminPass=args.passwd,
 				keyName=args.key,
 				name=args.name,
