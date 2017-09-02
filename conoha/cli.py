@@ -437,7 +437,8 @@ class NetworkCommand():
 		else:
 			yield ['Direction', 'EtherType', 'RangeMin', 'RangeMax', 'Protocol', 'RemoteIPPrefix']
 		# Body
-		for rule in sg.rules:
+		rules = sg is not None and sg.rules or []
+		for rule in rules:
 			if args.verbose:
 				yield [rule.id_, rule.direction, rule.ethertype, rule.rangeMin, rule.rangeMax, rule.protocol, rule.remoteIPPrefix]
 			else:
