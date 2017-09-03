@@ -1,5 +1,6 @@
 
 from .api import API, CustomList
+from . import error
 
 __all__ = "VMPlan VMPlanList VMImage VMImageList VMList VM KeyList Key".split()
 
@@ -217,6 +218,9 @@ class KeyList(ComputeAPI, CustomList):
 		publicKey or publicKeyFile がfile likeオブジェクトなら、そのキーを使用
 		publicKey is None ならば、新しいキーを作成。必ず返されるKey objectからprivateKeyを取得し、保存すること
 		"""
+		if not all(char.isalnum() or char in ['-', '_'] for char in name):
+			raise error.InvalidNameError('Invalid key name. You can use only alphanumeric characters, "-" and "_".')
+
 		data = {'keypair':{'name': name}}
 		keyString = None
 

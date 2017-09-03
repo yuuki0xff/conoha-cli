@@ -12,6 +12,7 @@ from conoha.block import BlockTypeList, VolumeList
 from conoha.image import ImageList, Quota
 from tabulate import tabulate
 import functools
+from conoha import error
 
 formatters = ('plain', 'simple', 'vertical')
 maxCommandNameLength = 20
@@ -115,7 +116,12 @@ def main():
 
 	conf = Config()
 	token = Token(conf)
-	parsed_args.func(token, parsed_args)
+	try:
+		parsed_args.func(token, parsed_args)
+		return 0
+	except error.APIError as e:
+		print('ERROR:', e, file=sys.stderr)
+		return 3
 
 class HelpFormatter(argparse.HelpFormatter):
 	"""
