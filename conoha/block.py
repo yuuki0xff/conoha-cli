@@ -90,9 +90,9 @@ class VolumeList(BlockStorageAPI, CustomList):
 		"""
 		self._validateVolumeSize(size)
 		if type(bootable) not in [type(None), bool]:
-			raise TypeError('bootable must be boolean value or None')
+			raise error.TypeError('bootable must be boolean value or None')
 		if not isinstance(metadata, dict):
-			raise TypeError('metadata must be dict like object')
+			raise error.TypeError('metadata must be dict like object')
 		if name is not None:
 			self._validateVolumeName(name)
 
