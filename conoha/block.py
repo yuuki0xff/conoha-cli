@@ -1,6 +1,9 @@
 
+import string
+
 from .api import API, CustomList
 from .image import Image
+from . import error
 
 __all__ = 'BlockType BlockTypeList Volume VolumeList'.split()
 
@@ -85,15 +88,13 @@ class VolumeList(BlockStorageAPI, CustomList):
 		sizeには 200 または 500 を指定する
 		nameは255文字以下。使用可能な文字は[a-zA-Z\\-_]
 		"""
-		assert type(size) is int, TypeError('size must be int type')
-		assert size in [200, 500], ValueError('size was 200 or 500')
-		if bootable is not None:
-			assert type(bootable) is bool, TypeError('bootable must be bool type')
-			assert isinstance(metadata, dict), TypeError('metadata must be dict like object')
-		if name is not  None:
-			assert type(name) is str, TypeError('name must be str type')
-			assert len(name) <= 255, ValueError('name was too long')
-			assert all(i.isalpha() or i.isnumeric() or (i in '-_') for i in name), ValueError('Invalid name')
+		self._validateVolumeSize(size)
+		if type(bootable) not in [type(None), bool]:
+			raise TypeError('bootable must be boolean value or None')
+		if not isinstance(metadata, dict):
+			raise TypeError('metadata must be dict like object')
+		if name is not None:
+			self._validateVolumeName(name)
 
 		data = {'volume': {
 			'source_volid': source,
@@ -113,3 +114,22 @@ class VolumeList(BlockStorageAPI, CustomList):
 	def delete(self, volumeId):
 		res = self._DELETE('volumes/'+volumeId, isDeserialize=False)
 
+	@staticmethod
+	def _validateVolumeSize(size):
+		if type(size) is not int:
+			raise error.TypeError('Volume size must be int type.')
+		if size not in [200, 500]:
+			raise error.ValueError('Volume size is either 200 or 500.')
+
+	@staticmethod
+	def _validateVolumeName(name):
+		charset = string.ascii_letters + string.digits + '-_'
+		if type(name) is not str:
+			raise error.TypeError('Volume name must be str type, but got {} type.'.format(type(name)))
+		if len(name) < 1:
+			raise error.InvalidNameError('Volume name can not empty.')
+		if len(name) > 255:
+			raise error.InvalidNameError('Volume name is too long. Its length must be between 1 and 255.')
+		for c in name:
+			if c not in charset:
+				raise error.InvalidNameError('Volume name can not use "{}" character. Its can use only alphabet, digit characters, "-" and "_".'.format(c))

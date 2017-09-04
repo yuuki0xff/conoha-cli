@@ -1,5 +1,6 @@
 
 from .api import API, CustomList
+from . import error
 
 __all__ = "SecurityGroupList SecurityGroup SecurityGroupRuleList SecurityGroupRule".split()
 
@@ -36,6 +37,8 @@ class SecurityGroupList(NetworkAPI, CustomList):
 				return sg
 
 	def add(self, name, description=None):
+		# NOTE: This API seem to have not validation of parameters.
+		#       https://www.conoha.jp/docs/neutron-create_secgroup.html
 		data = {'security_group': {
 			'name': name,
 			'description': description,
@@ -87,11 +90,17 @@ class SecurityGroupRuleList(NetworkAPI, CustomList):
 
 	def update(self): pass
 	def add(self, direction, ethertype, portMin=None, portMax=None, protocol=None, remoteIPPrefix=None):
-		assert(direction in ['ingress', 'egress'])
-		assert(ethertype in ['IPv4', 'IPv6'])
-		assert(portMin is None or str(portMin).isdigit())
-		assert(portMax is None or str(portMax).isdigit())
-		assert(protocol is None or protocol in ['tcp', 'udp', 'icmp', 'null'])
+		# validations
+		if direction not in ['ingress', 'egress']:
+			raise error.ValueError('direction must be either "ingress" or "egress".')
+		if ethertype not in ['IPv4', 'IPv6']:
+			raise error.ValueError('ethertype must be either "IPv4" or "IPv6".')
+		if portMin not in [type(None), int]:
+			raise error.ValueError('portMin must be int or None.')
+		if portMax not in [type(None), int]:
+			raise error.ValueError('portMax must be int or None.')
+		if not(protocol is None or protocol in ['tcp', 'udp', 'icmp', 'null']):
+			raise error.ValueError('protocol must choice of "tcp", "udp", "icmp" or "null".')
 
 		data = {'security_group_rule':{
 			'direction': direction,

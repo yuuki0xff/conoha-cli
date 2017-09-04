@@ -1,5 +1,6 @@
 
 from .api import API, CustomList
+from . import error
 from collections import namedtuple
 
 __all__ = 'Image ImageList Quota'.split()
@@ -71,8 +72,7 @@ class Quota(ImageAPI):
 		sizeの単位はGB。
 		50, 550, 1050, ...のように500GB単位で設定可能
 		"""
-		assert(type(size) is int)
-		assert(size >= 50 and (size-50)%500 == 0) # size: 50, 550, 1050, ...
+		self._validateSize(size)
 
 		data = {'quota': {
 			self.region+'_image_size': str(size)+'GB'
@@ -81,3 +81,9 @@ class Quota(ImageAPI):
 		res = self._PUT('quota', data)
 		self.update(res)
 
+	@staticmethod
+	def _validateSize(size):
+		if type(size) is not int:
+			raise error.InvalidSizeError('Size must be int type, but got {} type.'.format(type(size)))
+		if not(size >= 50 and (size-50)%500 == 0):  # size: 50, 550, 1050, ...
+			raise error.InvalidSizeError('Size must choice of 50, 550, 1050, ...')

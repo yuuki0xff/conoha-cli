@@ -1,4 +1,6 @@
 
+import string
+
 from .api import API, CustomList
 from . import error
 
@@ -119,7 +121,9 @@ class VMList(ComputeAPI, CustomList):
 				'flavorRef' : flavor,
 				'metadata': {},
 				}}
-		if adminPass: data['server']['adminPass'] = adminPass
+		if adminPass:
+			self._validateAdminPass(adminPass)
+			data['server']['adminPass'] = adminPass
 		if keyName: data['server']['key_name'] = keyName
 		if name:
 			data['server']['metadata']['instance_name_tag'] = name
@@ -137,6 +141,26 @@ class VMList(ComputeAPI, CustomList):
 	def delete(self, vmid):
 		self._DELETE('servers/'+vmid, isDeserialize=False)
 		self._servers = None
+
+	@staticmethod
+	def _validateAdminPass(adminPass):
+		symbolChars = '!#$%&?”\'=+-_{}[]^~:;().,/|\\*@'
+		charset = string.ascii_letters + string.digits + symbolChars
+		if type(adminPass) is not str:
+			raise error.TypeError('Password must be str type, but got {} type.'.format(type(adminPass)))
+		if not 9 <= len(adminPass) <= 70:
+			raise error.InvalidPasswordError('Password length must be between 9 and 70.')
+		for c in adminPass:
+			if c not in charset:
+				raise error.InvalidPasswordError('Password can not use "{}" charactor. Its can only use alphabet characters, digits and some symbols ({}).'.format(c, symbolChars))
+		if not all([
+			set(adminPass) & set(string.ascii_lowercase),
+			set(adminPass) & set(string.ascii_uppercase),
+			set(adminPass) & set(string.digits),
+			set(adminPass) & set(symbolChars),
+		]):
+			raise error.InvalidPasswordError('Password must include a mix of uppercase letters, lowercase letters, numbers and symbols ({}).'.format(symbolChars))
+
 
 class VM(ComputeAPI):
 	"""仮想マシン
@@ -218,9 +242,7 @@ class KeyList(ComputeAPI, CustomList):
 		publicKey or publicKeyFile がfile likeオブジェクトなら、そのキーを使用
 		publicKey is None ならば、新しいキーを作成。必ず返されるKey objectからprivateKeyを取得し、保存すること
 		"""
-		if not all(char.isalnum() or char in ['-', '_'] for char in name):
-			raise error.InvalidNameError('Invalid key name. You can use only alphanumeric characters, "-" and "_".')
-
+		self._validateKeyName(name)
 		data = {'keypair':{'name': name}}
 		keyString = None
 
@@ -246,6 +268,19 @@ class KeyList(ComputeAPI, CustomList):
 		"""
 		self._DELETE('os-keypairs/'+keyName, isDeserialize=False)
 		self._keys = None
+
+	@staticmethod
+	def _validateKeyName(name):
+		charset = string.ascii_letters + string.digits + '-_'
+		if type(name) is not str:
+			raise error.TypeError('Key name must be str type, but got {} type.'.format(type(name)))
+		if len(name) < 1:
+			raise error.InvalidNameError('Key name must not empty.')
+		if len(name) > 255:
+			raise error.InvalidNameError('Key name is too long. Its length must be between 1 and 255.')
+		for c in name:
+			if c not in charset:
+				raise error.InvalidNameError('Key name can not use "{}" charactor. its can use only alphanumeric characters, "-" and "_".'.format(c))
 
 class Key(ComputeAPI):
 	"""SSHの鍵
