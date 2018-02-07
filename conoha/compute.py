@@ -217,6 +217,8 @@ class VM(ComputeAPI):
 	def getStatus(self):
 		res = self._GET('')
 		return res['server']['status']
+	def createImage(self, image_name):
+		self._action('createImage', {'name': image_name})
 
 class KeyList(ComputeAPI, CustomList):
 	"""SSHの鍵の一覧"""
