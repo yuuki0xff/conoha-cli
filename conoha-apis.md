@@ -1,6 +1,6 @@
 # ConoHa APIのサポート状況
 
-最終アップデート: 2016-04-04  
+最終アップデート: 2018-02-07  
 ConoHa APIのより詳しい情報は[公式ドキュメント](https://www.conoha.jp/docs/)から参照できます
 
 サポート状況
@@ -8,9 +8,9 @@ ConoHa APIのより詳しい情報は[公式ドキュメント](https://www.cono
 | API                      | 数         |
 | ------------------------ | ---------- |
 | all APIs                 | 238        |
-| fully supported APIs     | 47 (20%)   |
+| fully supported APIs     | 48 (20%)   |
 | partially supported APIs | 2 (1%)     |
-| not supported APIs       | 189 (79%)  |
+| not supported APIs       | 188 (79%)  |
 
 Identity Service
 ----------------
@@ -62,7 +62,7 @@ Compute Service
 | fully          | compute.VMList.resize           | POST        | /v2/{tenant\_id}/servers/{server\_id}/action                                  | VMリサイズ（confirm）                                |
 | fully          | compute.VMList.resize           | POST        | /v2/{tenant\_id}/servers/{server\_id}/action                                  | VMリサイズ（revert）                                 |
 | not            |                                 | POST        | /v2/{tenant\_id}/servers/{server\_id}/action                                  | VNCコンソール                                        |
-| not            |                                 | POST        | /v2/{tenant\_id}/servers/{server\_id}/action                                  | ローカルディスクのイメージ保存                       |
+| fully          | compute.VM.createImage          | POST        | /v2/{tenant\_id}/servers/{server\_id}/action                                  | ローカルディスクのイメージ保存                       |
 | not            |                                 | POST        | /v2/{tenant\_id}/servers/{server\_id}/action                                  | ストレージコントローラー変更                         |
 | not            |                                 | POST        | /v2/{tenant\_id}/servers/{server\_id}/action                                  | ネットワークアダプタ変更                             |
 | not            |                                 | POST        | /v2/{tenant\_id}/servers/{server\_id}/action                                  | ビデオデバイスの変更                                 |
