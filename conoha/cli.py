@@ -573,6 +573,11 @@ class ImageCommand():
 		listImages.add_argument('-v', '--verbose', action='store_true', help='be verbose')
 		listImages.set_defaults(func=cls.listImages)
 
+		deleteImage = subparser.add_parser('delete-image', help='delete image')
+		deleteImage.add_argument('-v', '--verbose', action='store_true', help='verbose output')
+		deleteImage.add_argument('images', type=str, nargs='+', metavar='IMAGES', help='image names')
+		deleteImage.set_defaults(func=cls.deleteImage)
+
 		showQuota = subparser.add_parser('show-quota', help='show quota')
 		showQuota.set_defaults(func=cls.showQuota)
 
@@ -587,6 +592,16 @@ class ImageCommand():
 		yield ['ID', 'Name', 'MinDisk', 'MinRAM', 'Status', 'CreatedAt']
 		for i in images:
 			yield [i.imageId, i.name, i.min_disk, i.min_ram, i.status, i.created_at]
+
+	@classmethod
+	def deleteImage(cls, token, args):
+		images = ImageList(token)
+		vms = VMList(token)
+		for name in args.images:
+			vmid = vms.toVmid(name)
+			if vmid is None:
+				raise error.InvalidNameError('specified VM not found: {}'.format(name))
+			images.delete(name)
 
 	@classmethod
 	@prettyPrint()

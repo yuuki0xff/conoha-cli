@@ -142,6 +142,12 @@ class VMList(ComputeAPI, CustomList):
 		self._DELETE('servers/'+vmid, isDeserialize=False)
 		self._servers = None
 
+	def toVmid(self, nameOrVmid):
+		vm = self.getServer(vmid=nameOrVmid, name=nameOrVmid)
+		if vm:
+			return vm.vmid
+		return None
+
 	@staticmethod
 	def _validateAdminPass(adminPass):
 		symbolChars = '!#$%&?”\'=+-_{}[]^~:;().,/|\\*@'
