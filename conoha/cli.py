@@ -226,11 +226,12 @@ class ComputeCommand():
 		addVmParser.set_defaults(func=cls.add_vm)
 
 		vmCommands = {
-				'start-vm' : {'func': cls.start_vm,  'help': 'start VM'},
-				'stop-vm':   {'func': cls.stop_vm,   'help': 'stop VM'},
-				'reboot-vm': {'func': cls.reboot_vm, 'help': 'reboot VM'},
-				'modify-vm': {'func': cls.modify_vm, 'help': 'change plan'},
-				'delete-vm': {'func': cls.delete_vm, 'help': 'delete VM'},
+				'start-vm' :    {'func': cls.start_vm,     'help': 'start VM'},
+				'stop-vm':      {'func': cls.stop_vm,      'help': 'stop VM'},
+				'reboot-vm':    {'func': cls.reboot_vm,    'help': 'reboot VM'},
+				'modify-vm':    {'func': cls.modify_vm,    'help': 'change plan'},
+				'delete-vm':    {'func': cls.delete_vm,    'help': 'delete VM'},
+				'create-image': {'func': cls.create_image, 'help': 'save local disk'},
 				}
 		for cmd in vmCommands:
 			vmParser = subparser.add_parser(cmd, help=vmCommands[cmd]['help'])
@@ -240,6 +241,8 @@ class ComputeCommand():
 				vmParser.add_argument('-f', '--force', action='store_true')
 			elif cmd == 'modify-vm':
 				vmParser.add_argument('-P', '--planid', type=str, help='plan id')
+			elif cmd == 'create-image':
+				vmParser.add_argument('-I', '--image-name', type=str, help='Image name')
 			vmParser.set_defaults(func=vmCommands[cmd]['func'])
 
 	@classmethod
@@ -366,6 +369,13 @@ class ComputeCommand():
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
 		if vm:
 			vm.resize(args.planid)
+
+	@classmethod
+	def create_image(cls, token, args):
+		vmlist = VMList(token)
+		vm = vmlist.getServer(vmid=args.id, name=args.name)
+		if vm:
+			vm.createImage(args.image_name)
 
 class NetworkCommand():
 	@classmethod
