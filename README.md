@@ -47,7 +47,7 @@ Command Usage
 -------------
 ```
 $ conoha-cli compute list-vms
-$ conoha-cli compute start-vm --name $VM_NAME
+$ conoha-cli compute start-vm $VM_NAME
 ```
 
 Library Usage

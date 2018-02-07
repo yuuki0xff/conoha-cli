@@ -13,6 +13,7 @@ from conoha.image import ImageList, Quota
 from tabulate import tabulate
 import functools
 from conoha import error
+import typing
 
 formatters = ('plain', 'simple', 'vertical')
 maxCommandNameLength = 20
@@ -235,8 +236,14 @@ class ComputeCommand:
 				}
 		for cmd in vmCommands:
 			vmParser = subparser.add_parser(cmd, help=vmCommands[cmd]['help'])
-			vmParser.add_argument('-n', '--name', type=str, help='VM name')
-			vmParser.add_argument('-i', '--id',   type=str, help='VM id')
+			vmParser.add_argument('-n', '--name', type=str, help='VM name (obsolete)')
+			vmParser.add_argument('-i', '--id',   type=str, help='VM id (obsolete)')
+
+			if cmd not in ['create-image']:
+				vmParser.add_argument('names', type=str, nargs='*', metavar='NAME', help='ID or name')
+			else:
+				vmParser.add_argument('names', type=str, nargs='?', metavar='NAME', help='ID or name')
+
 			if cmd == 'stop-vm':
 				vmParser.add_argument('-f', '--force', action='store_true')
 			elif cmd == 'modify-vm':
@@ -333,41 +340,32 @@ class ComputeCommand:
 	@classmethod
 	@prettyPrint()
 	def start_vm(cls, token, args):
-		vmlist = VMList(token)
-		vm = vmlist.getServer(vmid=args.id, name=args.name)
-		if vm:
+		for vm in cls._vmlist(token, args):
 			vm.start()
 
 	@classmethod
 	@prettyPrint()
 	def stop_vm(cls, token, args):
-		vmlist = VMList(token)
-		vm = vmlist.getServer(vmid=args.id, name=args.name)
-		if vm:
+		for vm in cls._vmlist(token, args):
 			vm.stop(args.force)
 
 	@classmethod
 	@prettyPrint()
 	def reboot_vm(cls, token, args):
-		vmlist = VMList(token)
-		vm = vmlist.getServer(vmid=args.id, name=args.name)
-		if vm:
+		for vm in cls._vmlist(token, args):
 			vm.restart()
 
 	@classmethod
 	@prettyPrint()
 	def delete_vm(cls, token, args):
 		vmlist = VMList(token)
-		vm = vmlist.getServer(vmid=args.id, name=args.name)
-		if vm:
+		for vm in cls._vmlist(token, args):
 			vmlist.delete(vm.vmid)
 
 	@classmethod
 	@prettyPrint()
 	def modify_vm(cls, token, args):
-		vmlist = VMList(token)
-		vm = vmlist.getServer(vmid=args.id, name=args.name)
-		if vm:
+		for vm in cls._vmlist(token, args):
 			vm.resize(args.planid)
 
 	@classmethod
@@ -376,6 +374,23 @@ class ComputeCommand:
 		vm = vmlist.getServer(vmid=args.id, name=args.name)
 		if vm:
 			vm.createImage(args.image_name)
+
+	@classmethod
+	def _vmlist(cls, token, args)->typing.Iterable[conoha.compute.VM]:
+		vmlist = VMList(token)
+		if args.names:
+			for name in args.names:
+				vm = vmlist.getServer(vmid=name, name=name)
+				if vm is None:
+					raise error.VMNotFound(name)
+				yield vm
+		elif args.id or args.name:
+			vm = vmlist.getServer(vmid=args.id, name=args.name)
+			if vm is None:
+				raise error.VMNotFound(args.id or args.name)
+			yield vm
+		else:
+			raise error.InvalidArgumentError('argument is not specified: must specify the --name, --id or NAME positional argument')
 
 class NetworkCommand:
 	@classmethod
@@ -620,7 +635,7 @@ class ImageCommand:
 		for name in args.images:
 			vmid = vms.toVmid(name)
 			if vmid is None:
-				raise error.InvalidNameError('specified VM not found: {}'.format(name))
+				raise error.ImageNotFound(name)
 			images.delete(name)
 
 	@classmethod

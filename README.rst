@@ -28,9 +28,9 @@ VPSの一覧を確認する::
 
 VPSを起動・終了・削除する::
 
-    $ conoha-cli compute start-vm --name $VM_NAME
-    $ conoha-cli compute stop-vm  --name $VM_NAME
-    $ conoha-cli compute delete-vm --name $VM_NAME
+    $ conoha-cli compute start-vm $VM_NAME
+    $ conoha-cli compute stop-vm  $VM_NAME
+    $ conoha-cli compute delete-vm $VM_NAME
 
 ライセンス
 ==========
