@@ -570,7 +570,10 @@ class ImageCommand():
 	@classmethod
 	def configureParser(cls, subparser):
 		listImages = subparser.add_parser('list-images', help='list saved images in current region')
-		listImages.add_argument('-v', '--verbose', action='store_true', help='be verbose')
+		listImages.add_argument('-v', '--verbose', action='store_true', help='verbose output')
+		listImages.add_argument('-b', '--visibility', choices=['public', 'private'], help='filter by visibility of the image')
+		listImages.add_argument('-s', '--sort', help='sort by comma delimited field names',
+		                        default='visibility,name')
 		listImages.set_defaults(func=cls.listImages)
 
 		deleteImage = subparser.add_parser('delete-image', help='delete image')
@@ -589,9 +592,26 @@ class ImageCommand():
 	@prettyPrint()
 	def listImages(cls, token, args):
 		images  = ImageList(token)
-		yield ['ID', 'Name', 'MinDisk', 'MinRAM', 'Status', 'CreatedAt']
-		for i in images:
-			yield [i.imageId, i.name, i.min_disk, i.min_ram, i.status, i.created_at]
+		def filterFn(i):
+			if args.visibility:
+				return args.visibility == i.visibility
+			return True
+
+		def sortKey(i):
+			fieldNames = args.sort.split(',')
+			return tuple(getattr(i, f, '') for f in fieldNames)
+
+		# Header
+		if args.verbose:
+			yield ['ID', 'Name', 'MinDisk', 'MinRam', 'Status', 'CreatedAt', 'Visibility']
+		else:
+			yield ['Name', 'Status', 'CreatedAt', 'Visibility']
+		# Body
+		for i in sorted(filter(filterFn, images), key=sortKey):
+			if args.verbose:
+				yield [i.imageId, i.name, i.min_disk, i.min_ram, i.status, i.created_at, i.visibility]
+			else:
+				yield [i.name, i.status, i.created_at, i.visibility]
 
 	@classmethod
 	def deleteImage(cls, token, args):
