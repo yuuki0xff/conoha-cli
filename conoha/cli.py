@@ -188,7 +188,7 @@ def getArgumentParser():
 
 	return parser
 
-class ComputeCommand():
+class ComputeCommand:
 	@classmethod
 	def configureParser(cls, subparser):
 		listCommands = {
@@ -377,7 +377,7 @@ class ComputeCommand():
 		if vm:
 			vm.createImage(args.image_name)
 
-class NetworkCommand():
+class NetworkCommand:
 	@classmethod
 	def configureParser(cls, subparser):
 		listSG = subparser.add_parser('list-security-groups', help='')
@@ -483,7 +483,7 @@ class NetworkCommand():
 		sg = sglist[args.group or args.group_id]
 		sg.rules.delete(args.rule_id)
 
-class BlockCommand():
+class BlockCommand:
 	@classmethod
 	def configureParser(cls, subparser):
 		listTypes = subparser.add_parser('list-types', help='display volume types')
@@ -566,7 +566,7 @@ class BlockCommand():
 		vol = volumeList[args.id or args.name]
 		volumeList.delete(vol.volumeId)
 
-class ImageCommand():
+class ImageCommand:
 	@classmethod
 	def configureParser(cls, subparser):
 		listImages = subparser.add_parser('list-images', help='list saved images in current region')
