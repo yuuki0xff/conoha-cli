@@ -2,6 +2,7 @@
 import string
 
 from .api import API, CustomList
+from .network import AddressList, SecurityGroupList
 from . import error
 
 __all__ = "VMPlan VMPlanList VMImage VMImageList VMList VM KeyList Key".split()
@@ -199,8 +200,8 @@ class VM(ComputeAPI):
 		self.status = info['status']
 		self.created = info['created']
 		self.updated = info['updated']
-		self.addressList = info['addresses']
-		self.securityGroupList = info['security_groups']
+		self.addressList = AddressList(info)
+		self.securityGroupList = SecurityGroupList(token, info)
 
 	def _action(self, actionName, actionValue=None):
 		action = {actionName: actionValue}

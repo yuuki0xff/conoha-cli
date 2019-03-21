@@ -2,7 +2,7 @@
 from .api import API, CustomList
 from . import error
 
-__all__ = "SecurityGroupList SecurityGroup SecurityGroupRuleList SecurityGroupRule".split()
+__all__ = "SecurityGroupList SecurityGroup SecurityGroupRuleList SecurityGroupRule AddressList Addres".split()
 
 class NetworkAPI(API):
 	def __init__(self, token, baseURIPrefix=None):
@@ -17,18 +17,23 @@ class SecurityGroupList(NetworkAPI, CustomList):
 	    sgroup = sgroups['groupName']
 	    sgroup = sgroups['groupId']
 	"""
-	def __init__(self, token):
+
+	def __init__(self, token, info=None):
 		super().__init__(token)
 		CustomList.__init__(self)
-		self.update()
+		self.update(info)
 
 	def _getitem(self, key, item):
 		return key in [item.id_, item.name]
 
-	def update(self):
+	def __str__(self):
+		return ', '.join(sorted(grp.name for grp in self))
+
+	def update(self, res=None):
 		"""セキュリティグループの一覧を更新する"""
-		res = self._GET('security-groups')
-		self.clear()
+		if res is None:
+			res = self._GET('security-groups')
+			self.clear()
 		self.extend(SecurityGroup(self.token, i) for i in res['security_groups'])
 
 	def getSecurityGroup(self, sgid=None, name=None):
@@ -60,10 +65,13 @@ class SecurityGroup(NetworkAPI):
 	"""
 	def __init__(self, token, info):
 		super().__init__(token)
-		self.id_ = info['id']
+		self.id_ = info.get('id', None)
 		self.name = info['name']
-		self.description = info['description']
-		self.rules = SecurityGroupRuleList(token, self.id_, info['security_group_rules'])
+		self.description = info.get('description', None)
+		if 'security_group_rules' in info:
+			self.rules = SecurityGroupRuleList(token, self.id_, info['security_group_rules'])
+		else:
+			self.rules = None
 
 	def updateName(self, name):
 		data = {'security_group': {
@@ -141,3 +149,22 @@ class SecurityGroupRule(NetworkAPI):
 		self.remoteIPPrefix = info['remote_ip_prefix']
 
 
+class AddressList(CustomList):
+	def __init__(self, info):
+		CustomList.__init__(self)
+		addrinfo = info['addresses']
+		addrlist = addrinfo[list(addrinfo.keys())[0]]
+		self.extend(Address(i) for i in addrlist)
+
+	def _getitem(self, key, item):
+		return key in [item.id_]
+
+	def __str__(self):
+		vms = sorted(self, key=lambda vm: (vm.version, vm.addr))
+		return ', '.join(vm.addr for vm in vms)
+
+
+class Address:
+	def __init__(self, info):
+		self.version = info['version']
+		self.addr = info['addr']

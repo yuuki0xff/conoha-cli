@@ -300,13 +300,13 @@ class ComputeCommand:
 		if args.verbose:
 			yield ['VMID', 'FlavorID', 'HostID', 'ImageID', 'TenantID', 'Name', 'Status', 'Created', 'Updated', 'AddressList', 'SecuretyGroupList']
 		else:
-			yield ['VMID', 'Name', 'Status']
+			yield ['VMID', 'Name', 'Status', 'AddressList', 'SecuretyGroupList']
 		# Body
 		for vm in vmlist:
 			if args.verbose:
 				yield [vm.vmid, vm.flavorId, vm.hostId, vm.imageId, vm.tenantId, vm.name, vm.status, vm.created, vm.updated, vm.addressList, vm.securityGroupList]
 			else:
-				yield [vm.vmid, vm.name, vm.status]
+				yield [vm.vmid, vm.name, vm.status, vm.addressList, vm.securityGroupList]
 
 	@classmethod
 	@prettyPrint()
