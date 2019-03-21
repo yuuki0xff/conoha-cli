@@ -217,10 +217,12 @@ class ComputeCommand:
 		addVmParser = subparser.add_parser('add-vm', help='add VM')
 		addVmParser.add_argument('-q', '--quiet', action='store_true', help='trun off output')
 		addVmParser.add_argument('-n', '--name',        type=str, help='VM name')         # for backward compatibility
-		addVmParser.add_argument('-i', '--image',       type=str, help='image name or image id')
-		addVmParser.add_argument('-I', '--imageid',     type=str, help='image id')        # for backward compatibility
-		addVmParser.add_argument('-p', '--plan',        type=str, help='plan name or plan id')
-		addVmParser.add_argument('-P', '--planid',      type=str, help='plan id')         # for backward compatibility
+		addVmImageGroup = addVmParser.add_mutually_exclusive_group(required=True)
+		addVmImageGroup.add_argument('-i', '--image',   type=str, help='image name or image id')
+		addVmImageGroup.add_argument('-I', '--imageid', type=str, help='image id')        # for backward compatibility
+		addVmPlanGroup = addVmParser.add_mutually_exclusive_group(required=True)
+		addVmPlanGroup.add_argument('-p', '--plan',     type=str, help='plan name or plan id')
+		addVmPlanGroup.add_argument('-P', '--planid',   type=str, help='plan id')         # for backward compatibility
 		addVmParser.add_argument(      '--passwd',      type=str, help='root user password')
 		addVmParser.add_argument('-k', '--key',         type=str, help='public key name')
 		addVmParser.add_argument('-g', '--group-names', type=str, help='security group name')
