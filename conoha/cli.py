@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
-from conoha.api import Token
-from conoha.config import Config
 from argparse import FileType
 import argparse
 import sys
+import functools
+import typing
+import getpass
+
+from tabulate import tabulate
+
+from conoha.api import Token
+from conoha.config import Config
 import conoha
 from conoha.compute import VMPlanList, VMImageList, VMList, KeyList
 from conoha.network import SecurityGroupList
 from conoha.block import BlockTypeList, VolumeList
 from conoha.image import ImageList, Quota
-from tabulate import tabulate
-import functools
 from conoha import error
-import typing
 
 formatters = ('plain', 'simple', 'vertical')
 maxCommandNameLength = 20
@@ -95,10 +98,14 @@ def str2bool(s):
 		return False
 	raise '"{}" is invalid value'.format(s)
 
-def main():
+
+def main(args=None):
 	parser = getArgumentParser()
+	if args is None:
+		args = sys.argv[1:]
+
 	try:
-		parsed_args = parser.parse_args()
+		parsed_args = parser.parse_args(args)
 
 		if parsed_args.version:
 			print('conoha-cli {}'.format(conoha.__version__))
@@ -215,12 +222,13 @@ class ComputeCommand:
 		deleteKeyParser.set_defaults(func=cls.delete_key)
 
 		addVmParser = subparser.add_parser('add-vm', help='add VM')
+		addVmParser.add_argument('-w', '--wizard', action='store_true', help='enable wizard mode')
 		addVmParser.add_argument('-q', '--quiet', action='store_true', help='trun off output')
 		addVmParser.add_argument('-n', '--name',        type=str, help='VM name')         # for backward compatibility
-		addVmImageGroup = addVmParser.add_mutually_exclusive_group(required=True)
+		addVmImageGroup = addVmParser.add_mutually_exclusive_group()
 		addVmImageGroup.add_argument('-i', '--image',   type=str, help='image name or image id')
 		addVmImageGroup.add_argument('-I', '--imageid', type=str, help='image id')        # for backward compatibility
-		addVmPlanGroup = addVmParser.add_mutually_exclusive_group(required=True)
+		addVmPlanGroup = addVmParser.add_mutually_exclusive_group()
 		addVmPlanGroup.add_argument('-p', '--plan',     type=str, help='plan name or plan id')
 		addVmPlanGroup.add_argument('-P', '--planid',   type=str, help='plan id')         # for backward compatibility
 		addVmParser.add_argument(      '--passwd',      type=str, help='root user password')
@@ -325,7 +333,124 @@ class ComputeCommand:
 	@classmethod
 	@prettyPrint()
 	def add_vm(cls, token, args):
-		groupNames = args.group_names and args.group_names.split(',')
+		if args.wizard:
+			# name
+			default_name = args.name
+			prompt = 'Name [L to list exists VM names]: '
+			if default_name:
+				prompt = 'Name [default: {},  L to list exists VM names]: '.format(default_name)
+			while True:
+				args.name = input(prompt)
+				if args.name == 'L':
+					main(['compute', 'list-vms'])
+					continue
+				if args.name == '':
+					args.name = default_name or None
+				break
+
+			# image
+			images = VMImageList(token)
+			default_image = args.imageid or args.image
+			if not default_image:
+				default_image = images[0].name
+				for img in images:
+					if '-docker-' in img.name and img.name.endswith('-amd64'):
+						# The img.name will be match this pattern.
+						# 'vmi-docker-xx.xx-ubuntu-xx.xx-amd64'
+						default_image = img.name
+						break
+			while True:
+				args.image = input('Base Image [default: {},  L to list images]: '.format(default_image))
+				if args.image == 'L':
+					main(['compute', 'list-images'])
+					continue
+				if args.image == '':
+					args.image = default_image
+				try:
+					args.imageid = images[args.image].imageId
+					break
+				except KeyError:
+					print('ERROR: Invalid image name. See the image list.')
+					continue
+
+			# plans
+			plans = VMPlanList(token)
+			default_plan = args.planid or args.plan or 'g-2gb'
+			while True:
+				args.plan = input('Plan [default: {},  L to list plans]: '.format(default_plan))
+				if args.plan == 'L':
+					main(['compute', 'list-plans'])
+					continue
+				if args.plan == '':
+					args.plan = default_plan
+				try:
+					args.planid = plans[args.plan].planId
+					break
+				except KeyError:
+					print('ERROR: Invalid plan name. See the plan list.')
+					continue
+
+			# password
+			if not args.passwd:
+				while True:
+					passwd1 = getpass.getpass('Password: ')
+					passwd2 = getpass.getpass('Confirm Password: ')
+					if passwd1 == passwd2:
+						args.passwd = passwd1
+						break
+					else:
+						print('ERROR: Password does not match. Please re-enter the password again.')
+			else:
+				print('Password: ***** (masked)')
+
+			# SSH Public Key
+			keys = KeyList(token)
+			default_key = args.key
+			if not args.key:
+				if len(keys):
+					default_key = keys[0].name
+			if default_key:
+				while True:
+					args.key = input(
+						'SSH Public Key [default: {},  L to list keys, None to unspecified the key]: '.format(
+							default_key))
+					if args.key == 'L':
+						main(['compute', 'list-keys'])
+						continue
+					if args.key == 'None':
+						args.key = None
+						break
+					if args.key == '':
+						args.key = default_key
+					try:
+						_ = keys[args.key]
+						break
+					except KeyError:
+						print('ERROR: invalid key name. See the key list')
+						continue
+			else:
+				# 公開鍵が登録されていない
+				args.key = None
+
+			# Security Groups
+			default_groups = args.group_names or 'default, gncs-ipv4-all, gncs-ipv6-all'
+			while True:
+				args.group_names = input('Security Groups [default: {},  L to list groups]: '.format(default_groups))
+				if args.group_names == 'L':
+					main(['network', 'list-security-groups'])
+					continue
+				if args.group_names == '':
+					args.group_names = default_groups
+				break
+		else:
+			if not any([args.imageid, args.image]):
+				raise error.InvalidArgumentError('one of the arguments --image or --imageid is required.')
+			if not any([args.planid, args.plan]):
+				raise error.InvalidArgumentError('one on the arguments --plan or --planid is required.')
+
+		groupNames = None
+		if args.group_names.strip():
+			groupNames = [group.strip() for group in args.group_names.strip().split(',')]
 
 		vmlist = VMList(token)
 		vmid = vmlist.add(

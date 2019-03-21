@@ -127,4 +127,5 @@ class CustomList(list):
 			for item in self:
 				if self._getitem(key, item):
 					return item
+			raise KeyError(key)
 
