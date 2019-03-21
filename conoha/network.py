@@ -34,6 +34,12 @@ class SecurityGroupList(NetworkAPI, CustomList):
 		if res is None:
 			res = self._GET('security-groups')
 			self.clear()
+		else:
+			if 'security_groups' not in res:
+				# VMの作成直後は、VM一覧からSecurity Groupsを取得できない。
+				# このときにクラッシュするのを防止する。
+				# TODO: ここでハンドリングするのは良くない。
+				return
 		self.extend(SecurityGroup(self.token, i) for i in res['security_groups'])
 
 	def getSecurityGroup(self, sgid=None, name=None):
@@ -153,8 +159,10 @@ class AddressList(CustomList):
 	def __init__(self, info):
 		CustomList.__init__(self)
 		addrinfo = info['addresses']
-		addrlist = addrinfo[list(addrinfo.keys())[0]]
-		self.extend(Address(i) for i in addrlist)
+		keys = list(addrinfo.keys())
+		if keys:
+			addrlist = addrinfo[keys[0]]
+			self.extend(Address(i) for i in addrlist)
 
 	def _getitem(self, key, item):
 		return key in [item.id_]
