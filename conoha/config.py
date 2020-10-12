@@ -74,6 +74,8 @@ class Config(SafeConfigParser):
 				'~/.conoha/conifg',
 				]))
 
+		self._translateRegion()
+
 	def _pathExpand_(self, pathList):
 		for i, item in enumerate(pathList):
 			pathList[i] = os.path.expanduser(os.path.expandvars(item))
@@ -99,3 +101,16 @@ class Config(SafeConfigParser):
 			if section and parameter:
 				self[section][parameter] = os.environ[key]
 
+	def _translateRegion(self):
+		""" endpoint.regionに国名を指定されていた場合、リージョンIDに置き換える。
+		これは、後方互換性を維持するための処理。
+		"""
+		country2region = {
+			'japan': 'tyo1',
+			'singapore': 'sin1',
+			'usa': 'sjc1',
+		}
+		region = self.get('endpoint', 'region')
+		if region in country2region:
+			# regionに国名が指定されている。リージョンIDに置き換える。
+			self.set('endpoint', 'region', country2region[region])
