@@ -97,6 +97,7 @@ class Token(API):
 				},
 			}}
 		self.tenantId = conf.get('api', 'tenant')
+		self.region = conf.get('endpoint', 'region')
 		if self.tenantId:
 			data['auth']['passwordCredentials']['tenantId'] = self.tenantId
 		res = self._POST(path, data)
@@ -104,11 +105,15 @@ class Token(API):
 
 	def getTenantId(self):
 		return self.tenantId
+	def getRegion(self):
+		return self.region
 	def getAuthToken(self):
 		return self.token['id']
 	def getEndpointURL(self, name):
-		url = self.conf.get('endpoint', name, fallback=None) or self.conf.endpoint[self.conf.get('endpoint', 'region')][name]
+		url = self.conf.get('endpoint', name, fallback=None) or self.conf.endpoint[name]
 		assert(url)
+		if '{REGION}' in url:
+			url = url.replace('{REGION}', self.getRegion())
 		if '{TENANT_ID}' in url:
 			url = url.replace('{TENANT_ID}', self.getTenantId())
 		return url.rstrip('/')

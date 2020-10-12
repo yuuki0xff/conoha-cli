@@ -26,36 +26,16 @@ class Config(SafeConfigParser):
 	環境変数名は"CONOHA_{section}_{key}"で、全て大文字である。
 	"""
 	endpoint = {
-			'japan': {
-				'account': 'https://account.tyo1.conoha.io/v1/{TENANT_ID}',
-				'compute': 'https://compute.tyo1.conoha.io/v2/{TENANT_ID}',
-				'volume': 'https://block-storage.tyo1.conoha.io/v2/{TENANT_ID}',
-				'database': 'https://database-hosting.tyo1.conoha.io/v1',
-				'image': 'https://image-service.tyo1.conoha.io/v2',
-				'dns': 'https://dns-service.tyo1.conoha.io/v1',
-				'object': 'https://object-storage.tyo1.conoha.io/v1/nc_{TENANT_ID}',
-				'mail': 'https://mail-hosting.tyo1.conoha.io/v1',
-				'identity': 'https://identity.tyo1.conoha.io/v2.0',
-				'network': 'https://networking.tyo1.conoha.io/v2.0',
-			},
-			'singapore': {
-				'compute': 'https://compute.sin1.conoha.io/v2/{TENANT_ID}',
-				'volume': 'https://block-storage.sin1.conoha.io/v2/{TENANT_ID}',
-				'database': 'https://database-hosting.sin1.conoha.io/v1',
-				'image': 'https://image-service.sin1.conoha.io/v2',
-				'mail': 'https://mail-hosting.sin1.conoha.io/v1',
-				'identity': 'https://identity.sin1.conoha.io/v2.0',
-				'network': 'https://networking.sin1.conoha.io/v2.0',
-			},
-			'usa': {
-				'compute': 'https://compute.sjc1.conoha.io/v2/{TENANT_ID}',
-				'volume': 'https://block-storage.sjc1.conoha.io/v2/{TENANT_ID}',
-				'database': 'https://database-hosting.sjc1.conoha.io/v1',
-				'image': 'https://image-service.sjc1.conoha.io/v2',
-				'mail': 'https://mail-hosting.sjc1.conoha.io/v1',
-				'identity': 'https://identity.sjc1.conoha.io/v2.0',
-				'network': 'https://networking.sjc1.conoha.io/v2.0',
-			},
+			'account': 'https://account.{REGION}.conoha.io/v1/{TENANT_ID}',
+			'compute': 'https://compute.{REGION}.conoha.io/v2/{TENANT_ID}',
+			'volume': 'https://block-storage.{REGION}.conoha.io/v2/{TENANT_ID}',
+			'database': 'https://database-hosting.{REGION}.conoha.io/v1',
+			'image': 'https://image-service.{REGION}.conoha.io/v2',
+			'dns': 'https://dns-service.{REGION}.conoha.io/v1',
+			'object': 'https://object-storage.{REGION}.conoha.io/v1/nc_{TENANT_ID}',
+			'mail': 'https://mail-hosting.{REGION}.conoha.io/v1',
+			'identity': 'https://identity.{REGION}.conoha.io/v2.0',
+			'network': 'https://networking.{REGION}.conoha.io/v2.0',
 		}
 
 	_defaultValue = {
@@ -73,7 +53,7 @@ class Config(SafeConfigParser):
 				'allow_plans': '',
 				},
 			'endpoint': {
-				'region': 'japan',
+				'region': 'tyo1',
 				},
 			}
 
@@ -93,6 +73,8 @@ class Config(SafeConfigParser):
 				'$XDG_CONFIG_HOME/conoha/config',
 				'~/.conoha/conifg',
 				]))
+
+		self._translateRegion()
 
 	def _pathExpand_(self, pathList):
 		for i, item in enumerate(pathList):
@@ -119,3 +101,16 @@ class Config(SafeConfigParser):
 			if section and parameter:
 				self[section][parameter] = os.environ[key]
 
+	def _translateRegion(self):
+		""" endpoint.regionに国名を指定されていた場合、リージョンIDに置き換える。
+		これは、後方互換性を維持するための処理。
+		"""
+		country2region = {
+			'japan': 'tyo1',
+			'singapore': 'sin1',
+			'usa': 'sjc1',
+		}
+		region = self.get('endpoint', 'region')
+		if region in country2region:
+			# regionに国名が指定されている。リージョンIDに置き換える。
+			self.set('endpoint', 'region', country2region[region])
