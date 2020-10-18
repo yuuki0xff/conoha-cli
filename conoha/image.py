@@ -28,7 +28,7 @@ class Image(ImageAPI):
 		self.protected = data['protected']
 		self.min_ram = data['min_ram']
 		self.file = data['file']
-		self.checksum = data['checksum']
+		self.checksum = data.get('checksum')
 		self.owner = data['owner']
 		self.direct_url = data['direct_url']
 		self.hw_qemu_guest_agent = data.get('hw_qemu_guest_agent')
