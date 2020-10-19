@@ -16,6 +16,7 @@ from conoha.compute import VMPlanList, VMImageList, VMList, KeyList
 from conoha.network import SecurityGroupList
 from conoha.block import BlockTypeList, VolumeList
 from conoha.image import ImageList, Quota
+from conoha.dns import DomainList, RecordList
 from conoha import error
 
 formatters = ('plain', 'simple', 'vertical')
@@ -193,6 +194,10 @@ def getArgumentParser():
 	parser_image = subparser.add_parser('image', help='Image service')
 	subparser_image = parser_image.add_subparsers()
 	ImageCommand.configureParser(subparser_image)
+
+	parser_image = subparser.add_parser('dns', help='DNS service')
+	subparser_dns = parser_image.add_subparsers()
+	DNSCommand.configureParser(subparser_dns)
 
 	return parser
 
@@ -777,6 +782,198 @@ class ImageCommand:
 	def setQuota(cls, token, args):
 		quota = Quota(token)
 		quota.set(args.size)
+
+class DNSCommand:
+	@classmethod
+	def configureParser(cls, subparser):
+		listDomains = subparser.add_parser('list-domains', help='list domains')
+		listDomains.add_argument('-v', '--verbose', action='store_true', help='verbose output')
+		listDomains.set_defaults(func=cls.listDomains)
+
+		domainCommands = {
+				'add-domain': cls.addDomain,
+				'update-domain': cls.updateDomain,
+				}
+		for cmd in domainCommands:
+			parser = subparser.add_parser(cmd, help='')
+			parser.add_argument('-q', '--quiet', action='store_true')
+			parser.add_argument('-n', '--name', type=str, help='record name')
+			parser.add_argument('-e', '--email', type=str, help='e-mail address')
+			parser.add_argument(      '--ttl', type=int, help='TTL')
+			parser.add_argument(      '--description', type=str, help='description')
+			parser.add_argument(      '--gslb', type=int, help='GSLB (0:OFF/1:ON)')
+			parser.set_defaults(func=domainCommands[cmd])
+
+		deleteDomain = subparser.add_parser('delete-domain', help='delete domain')
+		deleteDomain.add_argument('-d', '--domain', type=str, help='domain name or ID')
+		deleteDomain.set_defaults(func=cls.deleteDomain)
+
+		listRecords = subparser.add_parser('list-records', help='list records')
+		listRecords.add_argument('-v', '--verbose', action='store_true', help='verbose output')
+		listRecords.add_argument('-d', '--domains', type=str, nargs='*', help='domain name or ID')
+		listRecords.set_defaults(func=cls.listRecords)
+
+		recordCommands = {
+				'add-record': cls.addRecord,
+				'update-record': cls.updateRecord,
+				}
+		for cmd in recordCommands:
+			parser = subparser.add_parser(cmd, help='')
+			parser.add_argument('-q', '--quiet', action='store_true')
+			parser.add_argument('-d', '--domain', type=str, help='domain name or ID')
+			parser.add_argument('-R', '--record-id', type=str, help='record ID')
+			parser.add_argument('-n', '--name', type=str, help='record name')
+			parser.add_argument('-t', '--type', type=str, choices=['A', 'AAAA', 'MX', 'CNAME', 'TXT', 'SRV', 'NS', 'PTR'], help='record type')
+			parser.add_argument('-D', '--data', type=str, help='record data')
+			parser.add_argument('-p', '--priority', type=int, help='priority (required for MX/SRV)')
+			parser.add_argument(      '--ttl', type=int, help='TTL')
+			parser.add_argument(      '--description', type=str, help='description')
+			parser.add_argument(      '--gslb', type=int, help='GSLB (0:OFF/1:ON)')
+			parser.set_defaults(func=recordCommands[cmd])
+
+		deleteRecord = subparser.add_parser('delete-record', help='delete record')
+		deleteRecord.add_argument('-R', '--record-id', type=str, help='record ID')
+		deleteRecord.set_defaults(func=cls.deleteRecord)
+
+	@classmethod
+	@prettyPrint()
+	def listDomains(cls, token, args):
+		domainList = DomainList(token)
+
+		# Header
+		if args.verbose:
+			yield ['ID', 'Name', 'TTL', 'Email', 'Serial', 'GSLB', 'Description', 'CreatedAt']
+		else:
+			yield ['Name', 'TTL', 'CreatedAt']
+		# Body
+		for domain in domainList:
+			if args.verbose:
+				yield [domain.domainId, domain.name, domain.ttl, domain.email, domain.serial, domain.gslb, domain.description, domain.created_at]
+			else:
+				yield [domain.name, domain.ttl, domain.created_at]
+
+	@classmethod
+	@prettyPrint()
+	def addDomain(cls, token, args):
+		domainList = DomainList(token)
+		domain = domainList.add(
+			args.name,
+			args.email,
+			ttl=args.ttl,
+			description=args.description,
+			gslb=args.gslb
+			)
+		if not args.quiet:
+			yield ['ID']
+			yield [domain.domainId]
+
+	@classmethod
+	def updateDomain(cls, token, args):
+		domainList = DomainList(token)
+		domainList.update(
+			args.name,
+			email=args.email,
+			ttl=args.ttl,
+			description=args.description,
+			gslb=args.gslb
+			)
+
+	@classmethod
+	def deleteDomain(cls, token, args):
+		domainList = DomainList(token)
+		domainList.delete(args.domain)
+
+	@classmethod
+	@prettyPrint()
+	def listRecords(cls, token, args):
+		domainList = DomainList(token)
+		records = []
+		if args.domains:
+			for nameOrDomainid in args.domains:
+				domainId = domainList.toDomainid(nameOrDomainid)
+				if domainId:
+					recordList = RecordList(token, domainId)
+					records.extend(recordList)
+		else:
+			for domain in domainList:
+				recordList = RecordList(token, domain.domainId)
+				records.extend(recordList)
+
+		# Header
+		if args.verbose:
+			yield ['ID', 'DomainID', 'Name', 'Type', 'TTL', 'Data', 'Description', 'CreatedAt']
+		else:
+			yield ['Name', 'Type', 'TTL', 'Data']
+		# Body
+		for record in sorted(records, key=lambda x: (x.domainId, x.name, x.type)):
+			if args.verbose:
+				yield [record.recordId, record.domainId, record.name, record.type, record.ttl, record.data, record.description, record.created_at]
+			else:
+				yield [record.name, record.type, record.ttl, record.data]
+
+	@classmethod
+	@prettyPrint()
+	def addRecord(cls, token, args):
+		domainList = DomainList(token)
+		domainId = domainList.toDomainid(args.domain)
+		if args.type != 'CNAME':
+			args.name = domainList.toName(domainId)  # ドメイン名以外は受け付けないので
+		if not domainId:
+			raise error.NotFound('domain', args.domain)
+
+		recordList = RecordList(token, domainId)
+		record = recordList.add(
+				name=args.name,
+				type=args.type,
+				data=args.data,
+				priority=args.priority,
+				ttl=args.ttl,
+				description=args.description,
+				)
+		if not args.quiet:
+			yield ['ID']
+			yield [record.recordId]
+
+	@classmethod
+	@prettyPrint()
+	def updateRecord(cls, token, args):
+		domainList = DomainList(token)
+		recordList = None
+		if args.domain:
+			domainId = domainList.toDomainid(args.domain)
+			if domainId:
+				recordList = RecordList(token, domainId)
+		else:
+			for domain in domainList:
+				recordList = RecordList(token, domain.domainId)
+				record = recordList.getRecord(args.record_id)
+				if record:
+					break
+			else:
+				raise error.NotFound('record', args.record_id)
+
+		recordList.update(
+				args.record_id,
+				name=args.name,
+				type=args.type,
+				data=args.data,
+				priority=args.priority,
+				ttl=args.ttl,
+				description=args.description,
+				gslb=args.gslb
+				)
+
+	@classmethod
+	def deleteRecord(cls, token, args):
+		domainList = DomainList(token)
+		for domain in domainList:
+			recordList = RecordList(token, domain.domainId)
+			record = recordList.getRecord(args.record_id)
+			if record:
+				recordList.delete(record.recordId)
+				return
+		else:
+			raise error.NotFound('record', args.record_id)
 
 if __name__ == '__main__':
 	exit(main())
