@@ -85,7 +85,7 @@ Image Service            | Partially Supported
 Network Service          | Partially Supported
 Object Storage Service   | Not Supported
 Database Hosting Service | Not Supported
-DNS Service              | Not Supported
+DNS Service              | Partially Supported
 Mail Hosting Service     | Not Supported
 
 See `conoha-apis.md` for deltails.

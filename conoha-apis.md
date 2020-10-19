@@ -1,6 +1,6 @@
 # ConoHa APIのサポート状況
 
-最終アップデート: 2018-02-07  
+最終アップデート: 2020-10-16  
 ConoHa APIのより詳しい情報は[公式ドキュメント](https://www.conoha.jp/docs/)から参照できます
 
 サポート状況
@@ -8,9 +8,9 @@ ConoHa APIのより詳しい情報は[公式ドキュメント](https://www.cono
 | API                      | 数         |
 | ------------------------ | ---------- |
 | all APIs                 | 238        |
-| fully supported APIs     | 48 (20%)   |
+| fully supported APIs     | 56 (24%)   |
 | partially supported APIs | 2 (1%)     |
-| not supported APIs       | 188 (79%)  |
+| not supported APIs       | 180 (76%)  |
 
 Identity Service
 ----------------
@@ -240,22 +240,22 @@ Database Hosting Service
 
 DNS Service
 -----------
-| Support Status | Class or Method | HTTP Method | URI                                                     | Description                  |
-| -------------- | --------------- | ----------- | ------------------------------------------------------- | ---------------------------- |
-| not            |                 | GET         | /                                                       | バージョン情報取得           |
-| not            |                 | GET         | /v1/domains/(uuid:domain\_id)/servers                   | ドメインホスティング情報表示 |
-| not            |                 | GET         | /v1/domains                                             | ドメイン一覧表示             |
-| not            |                 | POST        | /v1/domains                                             | ドメイン作成                 |
-| not            |                 | DELETE      | /v1/domains/(uuid:domain\_id)                           | ドメイン削除                 |
-| not            |                 | GET         | /v1/domains/(uuid:domain\_id)                           | ドメイン情報表示             |
-| not            |                 | PUT         | /v1/domains/(uuid:domain\_id)                           | ドメイン更新                 |
-| not            |                 | GET         | /v1/domains/(uuid:domain\_id)/records                   | レコード一覧取得             |
-| not            |                 | POST        | /v1/domains/(uuid:domain\_id)/records                   | レコード作成                 |
-| not            |                 | DELETE      | /v1/domains/(uuid:domain\_id)/records/(uuid:record\_id) | レコード削除                 |
-| not            |                 | GET         | /v1/domains/(uuid:domain\_id)/records/(uuid:record\_id) | レコード情報表示             |
-| not            |                 | PUT         | /v1/domains/(uuid:domain\_id)/records/(uuid:record\_id) | レコード更新                 |
-| not            |                 | POST        | /v2/zones                                               | ゾーンファイルインポート     |
-| not            |                 | GET         | /v2/zones/(uuid:id)                                     | ゾーンファイルエクスポート   |
+| Support Status | Class or Method        | HTTP Method | URI                                                     | Description                  |
+| -------------- | ---------------------- | ----------- | ------------------------------------------------------- | ---------------------------- |
+| not            |                        | GET         | /                                                       | バージョン情報取得           |
+| not            |                        | GET         | /v1/domains/(uuid:domain\_id)/servers                   | ドメインホスティング情報表示 |
+| fully          | dns.DomainList         | GET         | /v1/domains                                             | ドメイン一覧表示             |
+| fully          | dns.DomainList.add     | POST        | /v1/domains                                             | ドメイン作成                 |
+| fully          | dns.DomainList.delete  | DELETE      | /v1/domains/(uuid:domain\_id)                           | ドメイン削除                 |
+| not            |                        | GET         | /v1/domains/(uuid:domain\_id)                           | ドメイン情報表示             |
+| fully          | dns.DomainList.update  | PUT         | /v1/domains/(uuid:domain\_id)                           | ドメイン更新                 |
+| fully          | dns.RecordList         | GET         | /v1/domains/(uuid:domain\_id)/records                   | レコード一覧取得             |
+| fully          | dns.RecordList.add     | POST        | /v1/domains/(uuid:domain\_id)/records                   | レコード作成                 |
+| fully          | dns.RecordList.delete  | DELETE      | /v1/domains/(uuid:domain\_id)/records/(uuid:record\_id) | レコード削除                 |
+| not            |                        | GET         | /v1/domains/(uuid:domain\_id)/records/(uuid:record\_id) | レコード情報表示             |
+| fully          | dns.RecordList.update  | PUT         | /v1/domains/(uuid:domain\_id)/records/(uuid:record\_id) | レコード更新                 |
+| not            |                        | POST        | /v2/zones                                               | ゾーンファイルインポート     |
+| not            |                        | GET         | /v2/zones/(uuid:id)                                     | ゾーンファイルエクスポート   |
 
 Mail Hosting Service
 --------------------
