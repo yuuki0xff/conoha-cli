@@ -790,22 +790,26 @@ class DNSCommand:
 		listDomains.add_argument('-v', '--verbose', action='store_true', help='verbose output')
 		listDomains.set_defaults(func=cls.listDomains)
 
-		domainCommands = {
-				'add-domain': cls.addDomain,
-				'update-domain': cls.updateDomain,
-				}
-		for cmd in domainCommands:
-			parser = subparser.add_parser(cmd, help='')
-			parser.add_argument('-q', '--quiet', action='store_true')
-			parser.add_argument('-n', '--name', type=str, help='record name')
-			parser.add_argument('-e', '--email', type=str, help='e-mail address')
-			parser.add_argument(      '--ttl', type=int, help='TTL')
-			parser.add_argument(      '--description', type=str, help='description')
-			parser.add_argument(      '--gslb', type=int, help='GSLB (0:OFF/1:ON)')
-			parser.set_defaults(func=domainCommands[cmd])
+		addDomain = subparser.add_parser('add-domain', help='')
+		addDomain.add_argument('-q', '--quiet', action='store_true')
+		addDomain.add_argument('-n', '--name', type=str, required=True, help='record name')
+		addDomain.add_argument('-e', '--email', type=str, required=True, help='e-mail address')
+		addDomain.add_argument('--ttl', type=int, help='TTL')
+		addDomain.add_argument('--description', type=str, help='description')
+		addDomain.add_argument('--gslb', type=int, help='GSLB (0:OFF/1:ON)')
+		addDomain.set_defaults(func=cls.addDomain)
+
+		updateDomain = subparser.add_parser('update-domain', help='')
+		updateDomain.add_argument('-q', '--quiet', action='store_true')
+		updateDomain.add_argument('-n', '--name', type=str, help='record name')
+		updateDomain.add_argument('-e', '--email', type=str, help='e-mail address')
+		updateDomain.add_argument('--ttl', type=int, help='TTL')
+		updateDomain.add_argument('--description', type=str, help='description')
+		updateDomain.add_argument('--gslb', type=int, help='GSLB (0:OFF/1:ON)')
+		updateDomain.set_defaults(func=cls.updateDomain)
 
 		deleteDomain = subparser.add_parser('delete-domain', help='delete domain')
-		deleteDomain.add_argument('-d', '--domain', type=str, help='domain name or ID')
+		deleteDomain.add_argument('-d', '--domain', type=str, required=True, help='domain name or ID')
 		deleteDomain.set_defaults(func=cls.deleteDomain)
 
 		listRecords = subparser.add_parser('list-records', help='list records')
@@ -813,23 +817,35 @@ class DNSCommand:
 		listRecords.add_argument('-d', '--domains', type=str, nargs='*', help='domain name or ID')
 		listRecords.set_defaults(func=cls.listRecords)
 
-		recordCommands = {
-				'add-record': cls.addRecord,
-				'update-record': cls.updateRecord,
-				}
-		for cmd in recordCommands:
-			parser = subparser.add_parser(cmd, help='')
-			parser.add_argument('-q', '--quiet', action='store_true')
-			parser.add_argument('-d', '--domain', type=str, help='domain name or ID')
-			parser.add_argument('-R', '--record-id', type=str, help='record ID')
-			parser.add_argument('-n', '--name', type=str, help='record name')
-			parser.add_argument('-t', '--type', type=str, choices=['A', 'AAAA', 'MX', 'CNAME', 'TXT', 'SRV', 'NS', 'PTR'], help='record type')
-			parser.add_argument('-D', '--data', type=str, help='record data')
-			parser.add_argument('-p', '--priority', type=int, help='priority (required for MX/SRV)')
-			parser.add_argument(      '--ttl', type=int, help='TTL')
-			parser.add_argument(      '--description', type=str, help='description')
-			parser.add_argument(      '--gslb', type=int, help='GSLB (0:OFF/1:ON)')
-			parser.set_defaults(func=recordCommands[cmd])
+		addRecord = subparser.add_parser('add-record', help='')
+		addRecord.add_argument('-q', '--quiet', action='store_true')
+		addRecord.add_argument('-d', '--domain', type=str, required=True, help='domain name or ID')
+		addRecord.add_argument('-R', '--record-id', type=str, help='record ID')
+		addRecord.add_argument('-n', '--name', type=str, required=True, help='record name')
+		addRecord.add_argument('-t', '--type', type=str, choices=[
+			'A', 'AAAA', 'MX', 'CNAME', 'TXT', 'SRV', 'NS', 'PTR'
+		], required=True, help='record type')
+		addRecord.add_argument('-D', '--data', type=str, required=True, help='record data')
+		addRecord.add_argument('-p', '--priority', type=int, required=True, help='priority (required for MX/SRV)')
+		addRecord.add_argument(      '--ttl', type=int, help='TTL')
+		addRecord.add_argument(      '--description', type=str, help='description')
+		addRecord.add_argument(      '--gslb', type=int, help='GSLB (0:OFF/1:ON)')
+		addRecord.set_defaults(func=cls.addRecord)
+
+		updateRecord = subparser.add_parser('add-record', help='')
+		updateRecord.add_argument('-q', '--quiet', action='store_true')
+		updateRecord.add_argument('-d', '--domain', type=str, required=True, help='domain name or ID')
+		updateRecord.add_argument('-R', '--record-id', type=str, help='record ID')
+		updateRecord.add_argument('-n', '--name', type=str, help='record name')
+		updateRecord.add_argument('-t', '--type', type=str, choices=[
+			'A', 'AAAA', 'MX', 'CNAME', 'TXT', 'SRV', 'NS', 'PTR'
+		], help='record type')
+		updateRecord.add_argument('-D', '--data', type=str, help='record data')
+		updateRecord.add_argument('-p', '--priority', type=int, help='priority (required for MX/SRV)')
+		updateRecord.add_argument(      '--ttl', type=int, help='TTL')
+		updateRecord.add_argument(      '--description', type=str, help='description')
+		updateRecord.add_argument(      '--gslb', type=int, help='GSLB (0:OFF/1:ON)')
+		updateRecord.set_defaults(func=cls.addRecord)
 
 		deleteRecord = subparser.add_parser('delete-record', help='delete record')
 		deleteRecord.add_argument('-R', '--record-id', type=str, help='record ID')
