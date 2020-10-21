@@ -826,15 +826,15 @@ class DNSCommand:
 			'A', 'AAAA', 'MX', 'CNAME', 'TXT', 'SRV', 'NS', 'PTR'
 		], required=True, help='record type')
 		addRecord.add_argument('-D', '--data', type=str, required=True, help='record data')
-		addRecord.add_argument('-p', '--priority', type=int, required=True, help='priority (required for MX/SRV)')
+		addRecord.add_argument('-p', '--priority', type=int, help='priority (required for MX/SRV)')
 		addRecord.add_argument(      '--ttl', type=int, help='TTL')
 		addRecord.add_argument(      '--description', type=str, help='description')
 		addRecord.add_argument(      '--gslb', type=int, help='GSLB (0:OFF/1:ON)')
 		addRecord.set_defaults(func=cls.addRecord)
 
-		updateRecord = subparser.add_parser('add-record', help='')
+		updateRecord = subparser.add_parser('update-record', help='')
 		updateRecord.add_argument('-q', '--quiet', action='store_true')
-		updateRecord.add_argument('-d', '--domain', type=str, required=True, help='domain name or ID')
+		updateRecord.add_argument('-d', '--domain', type=str, help='domain name or ID')
 		updateRecord.add_argument('-R', '--record-id', type=str, help='record ID')
 		updateRecord.add_argument('-n', '--name', type=str, help='record name')
 		updateRecord.add_argument('-t', '--type', type=str, choices=[
@@ -845,7 +845,7 @@ class DNSCommand:
 		updateRecord.add_argument(      '--ttl', type=int, help='TTL')
 		updateRecord.add_argument(      '--description', type=str, help='description')
 		updateRecord.add_argument(      '--gslb', type=int, help='GSLB (0:OFF/1:ON)')
-		updateRecord.set_defaults(func=cls.addRecord)
+		updateRecord.set_defaults(func=cls.updateRecord)
 
 		deleteRecord = subparser.add_parser('delete-record', help='delete record')
 		deleteRecord.add_argument('-R', '--record-id', type=str, help='record ID')
@@ -959,6 +959,8 @@ class DNSCommand:
 			domainId = domainList.toDomainid(args.domain)
 			if domainId:
 				recordList = RecordList(token, domainId)
+			else:
+				raise error.NotFound('domain', args.domain)
 		else:
 			for domain in domainList:
 				recordList = RecordList(token, domain.domainId)
