@@ -62,7 +62,6 @@ class Config(SafeConfigParser):
 		assert(not(fromFile and fromDict))
 
 		self._setDefaultValue()
-		self._readEnv()
 		if fromFile:
 			self.read_file(open(fromFile))
 		elif fromDict:
@@ -73,6 +72,7 @@ class Config(SafeConfigParser):
 				'$XDG_CONFIG_HOME/conoha/config',
 				'~/.conoha/conifg',
 				]))
+		self._readEnv()
 
 		self._translateRegion()
 
