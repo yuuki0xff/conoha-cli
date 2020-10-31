@@ -18,9 +18,10 @@ class Config(SafeConfigParser):
 	        ~/.conoha/config
 
 	構成情報の優先順位は以下の通り
-	    1. 引数により指定された値
+	    1. fromDict引数で指定した値
 	    2. 環境変数
-	    3. デフォルト値
+	    3. 設定ファイル
+	    4. デフォルト値
 
 	configファイルはINI file formatでなければならない。
 	環境変数名は"CONOHA_{section}_{key}"で、全て大文字である。
@@ -62,10 +63,11 @@ class Config(SafeConfigParser):
 		assert(not(fromFile and fromDict))
 
 		self._setDefaultValue()
-		self._readEnv()
 		if fromFile:
 			self.read_file(open(fromFile))
+			self._readEnv()
 		elif fromDict:
+			self._readEnv()
 			self.read_dict(fromDict)
 		else:
 			os.environ.setdefault('XDG_CONFIG_HOME', '~/.config')
@@ -73,6 +75,7 @@ class Config(SafeConfigParser):
 				'$XDG_CONFIG_HOME/conoha/config',
 				'~/.conoha/conifg',
 				]))
+			self._readEnv()
 
 		self._translateRegion()
 
