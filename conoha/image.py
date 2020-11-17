@@ -30,7 +30,7 @@ class Image(ImageAPI):
 		self.file = data['file']
 		self.checksum = data.get('checksum')
 		self.owner = data['owner']
-		self.direct_url = data['direct_url']
+		self.direct_url = data.get('direct_url')
 		self.hw_qemu_guest_agent = data.get('hw_qemu_guest_agent')
 		self.schema = data['schema']
 
@@ -45,6 +45,11 @@ class ImageList(ImageAPI, CustomList):
 
 	def _getitem(self, key, item):
 		return key in [item.imageId, item.name]
+
+	def getImage(self, imageId=None, name=None):
+		for image in self:
+			if (imageId and image.imageId == imageId) or (name and image.name == name):
+				return image
 
 	def delete(self, imageId):
 		path= 'images/{}'.format(imageId)

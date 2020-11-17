@@ -763,12 +763,11 @@ class ImageCommand:
 	@classmethod
 	def deleteImage(cls, token, args):
 		images = ImageList(token)
-		vms = VMList(token)
 		for name in args.images:
-			vmid = vms.toVmid(name)
-			if vmid is None:
+			image = images.getImage(name=name)
+			if image is None:
 				raise error.ImageNotFound(name)
-			images.delete(name)
+			images.delete(image.imageId)
 
 	@classmethod
 	@prettyPrint()
