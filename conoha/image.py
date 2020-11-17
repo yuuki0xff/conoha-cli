@@ -30,7 +30,7 @@ class Image(ImageAPI):
 		self.file = data['file']
 		self.checksum = data.get('checksum')
 		self.owner = data['owner']
-		self.direct_url = data['direct_url']
+		self.direct_url = data.get('direct_url')
 		self.hw_qemu_guest_agent = data.get('hw_qemu_guest_agent')
 		self.schema = data['schema']
 
