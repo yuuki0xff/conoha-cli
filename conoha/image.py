@@ -46,6 +46,11 @@ class ImageList(ImageAPI, CustomList):
 	def _getitem(self, key, item):
 		return key in [item.imageId, item.name]
 
+	def getImage(self, imageId=None, name=None):
+		for image in self:
+			if (imageId and image.imageId == imageId) or (name and image.name == name):
+				return image
+
 	def delete(self, imageId):
 		path= 'images/{}'.format(imageId)
 		self._DELETE(path, isDeserialize=False)
