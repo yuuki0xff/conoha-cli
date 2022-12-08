@@ -21,7 +21,7 @@ export CONOHA_API_TENANT='xxxxx'
 ```
 # ~/.config/conoha/config
 [api]
-usre = xxxxx
+user = xxxxx
 passwd = xxxxx
 tenant = xxxxx
 ```
