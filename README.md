@@ -34,7 +34,7 @@ $ conoha-cli compute add-vm -w
 ...
 
 $ conoha-cli compute list-vms
-VMID                                  Name          Status    AddressList                                        SecuretyGroupList
+VMID                                  Name          Status    AddressList                                        SecurityGroupList
 ------------------------------------  ------------  --------  -------------------------------------------------  -------------------------------------
 00000000-0000-0000-0000-000000000000  app1          ACTIVE    111.222.101.11, 2400:8500:1300:800:111:222:101:11  default, gncs-ipv4-all, gncs-ipv6-all
 00000000-0000-0000-0000-000000000000  app2          ACTIVE    111.222.102.22, 2400:8500:1300:800:111:222:102:22  default, gncs-ipv4-all, gncs-ipv6-all
