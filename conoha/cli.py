@@ -313,9 +313,9 @@ class ComputeCommand:
 		vmlist = VMList(token)
 		# Header
 		if args.verbose:
-			yield ['VMID', 'FlavorID', 'HostID', 'ImageID', 'TenantID', 'Name', 'Status', 'Created', 'Updated', 'AddressList', 'SecuretyGroupList']
+			yield ['VMID', 'FlavorID', 'HostID', 'ImageID', 'TenantID', 'Name', 'Status', 'Created', 'Updated', 'AddressList', 'SecurityGroupList']
 		else:
-			yield ['VMID', 'Name', 'Status', 'AddressList', 'SecuretyGroupList']
+			yield ['VMID', 'Name', 'Status', 'AddressList', 'SecurityGroupList']
 		# Body
 		for vm in vmlist:
 			if args.verbose:
