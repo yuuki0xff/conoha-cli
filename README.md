@@ -1,5 +1,9 @@
 conoha-cli
 ==========
+
+***WARNING***:
+This project is no longer maintained. I recommend using the [python-openstackclient](https://pypi.org/project/python-openstackclient/) instead of the conoha-cli. Other choices are [giginc/conoha](https://github.com/giginc/conoha). If you would like to take over maintenance it, please contact me.
+
 conoha-cli is a command and Python3 library for [ConoHa](https://www.conoha.jp/) API.
 
 Installation
